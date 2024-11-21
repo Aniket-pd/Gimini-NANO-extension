@@ -16,9 +16,21 @@ document.addEventListener('mouseup', function(e) {
     if (selection.toString().length > 0) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
+        
+        // Store the initial scroll position
+        let initialScrollY = window.scrollY;
+        let initialScrollX = window.scrollX;
 
         const box = document.createElement('div');
         box.id = 'selection-box';
+        
+        // Function to update box position
+        const updatePosition = () => {
+            const updatedRect = range.getBoundingClientRect();
+            box.style.left = `${updatedRect.right + BOX_CONFIG.triangleSize + 5}px`;
+            box.style.top = `${updatedRect.top + (updatedRect.height / 2) - (BOX_CONFIG.height / 2)}px`;
+        };
+
         box.style.cssText = `
             position: fixed;
             width: ${BOX_CONFIG.width}px;
@@ -28,15 +40,18 @@ document.addEventListener('mouseup', function(e) {
             border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
-            left: ${rect.right + BOX_CONFIG.triangleSize + 5}px;
-            top: ${rect.top + (rect.height / 2) - (BOX_CONFIG.height / 2)}px;
             display: flex;
             flex-direction: column;
             justify-content: space-evenly;
             align-items: center;
             padding: ${BOX_CONFIG.buttonPadding}px;
         `;
+        
+        updatePosition(); // Set initial position
 
+        // Add scroll event listener
+        window.addEventListener('scroll', updatePosition);
+        
         // Create buttons with icons
         const button1 = document.createElement('button');
         const button2 = document.createElement('button');
@@ -130,13 +145,27 @@ document.addEventListener('mouseup', function(e) {
 
         // Add the box to the document
         document.body.appendChild(box);
-    }
-});
 
-// Remove the box when clicking elsewhere
-document.addEventListener('mousedown', function(e) {
-    const box = document.getElementById('selection-box');
-    if (box && !box.contains(e.target)) {
-        box.remove();
+        // Remove scroll listener when box is removed
+        const removeBox = () => {
+            window.removeEventListener('scroll', updatePosition);
+            box.remove();
+        };
+
+        // Update mousedown listener to use the new removeBox function
+        document.addEventListener('mousedown', function(e) {
+            const box = document.getElementById('selection-box');
+            if (box && !box.contains(e.target)) {
+                removeBox();
+            }
+        });
+
+        // Also remove box when selection changes
+        document.addEventListener('selectionchange', function() {
+            const box = document.getElementById('selection-box');
+            if (box && window.getSelection().toString().length === 0) {
+                removeBox();
+            }
+        });
     }
 });
