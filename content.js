@@ -8,12 +8,17 @@ const BOX_CONFIG = {
 
 document.addEventListener('mouseup', function(e) {
     const existingBox = document.getElementById('selection-box');
+    if (existingBox && (existingBox.contains(e.target) || e.target.closest('#selection-box'))) {
+        return;
+    }
+
     if (existingBox) {
         existingBox.remove();
     }
 
     const selection = window.getSelection();
     if (selection.toString().length > 0) {
+        console.log("happending ")
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
         
@@ -53,6 +58,7 @@ document.addEventListener('mouseup', function(e) {
         window.addEventListener('scroll', updatePosition);
         
         // Create buttons with icons
+        console.log("creating buttons")
         const button1 = document.createElement('button');
         const button2 = document.createElement('button');
         
@@ -101,11 +107,22 @@ document.addEventListener('mouseup', function(e) {
 
         // Add click handlers
         button1.onclick = () => {
-            navigator.clipboard.writeText(selection.toString());
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(selection.toString()).then(() => {
+                    alert('Text copied to clipboard!');
+                }).catch(err => {
+                    alert('Failed to copy text to clipboard');
+                    console.error('Could not copy text: ', err);
+                });
+            } else {
+                alert('Clipboard functionality not supported in your browser');
+                console.warn('Clipboard API not supported');
+            }
         };
 
         button2.onclick = () => {
-            // Add your share functionality here
+            alert('Share functionality coming soon!');
+            console.log('Share button clicked');
         };
 
         // Add CSS for the triangle
