@@ -3,7 +3,11 @@ const BOX_CONFIG = {
     width: 40,          // Width of the box in pixels
     height: 80,         // Height of the box in pixels
     buttonPadding: 4,   // Padding around buttons in pixels
-    triangleSize: 6     // Size of the triangle pointer in pixels
+    triangleSize: 6,     // Size of the triangle pointer in pixels
+    expandedWidth: 350,  // New: width when expanded
+    expandedHeight: 400,  // New: height when expanded
+    controlsHeight: 40,  // Height for the controls section
+    loadingSize: 30,    // Size of loading spinner
 };
 
 // Listen for mouseup events to trigger the selection box
@@ -101,48 +105,183 @@ document.addEventListener('mouseup', async function (e) {
         // Add click handlers
         button1.onclick = async () => {
             const selectionText = window.getSelection().toString();
+            const box = document.getElementById('selection-box');
 
             if (!selectionText || selectionText.trim().length === 0) {
                 alert('No text selected!');
                 return;
             }
 
-            // Check if Summarizer API is available
-            const capabilities = await self.ai.summarizer.capabilities();
-            if (capabilities.available === 'no') {
-                alert('Summarizer API is not available in this browser.');
-                return;
+            // Hide the buttons during summary generation
+            button1.style.display = 'none';
+            button2.style.display = 'none';
+
+            const summaryContainer = document.createElement('div');
+            summaryContainer.style.cssText = `
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            // Create text container first but don't add content yet
+            const textContainer = document.createElement('div');
+            textContainer.style.cssText = `
+                padding: 20px 25px;
+                overflow-y: auto;
+                flex-grow: 1;
+                margin-top: ${BOX_CONFIG.controlsHeight + 10}px;
+                position: relative;
+                min-height: 200px;
+                background: #ffffff;
+                border-radius: 0 0 4px 4px;
+            `;
+
+            async function updateSummary(length, type) {
+                textContainer.innerHTML = '';
+                const spinner = createLoadingSpinner();
+                textContainer.appendChild(spinner);
+
+                try {
+                    const options = {
+                        sharedContext: 'Summarizing selected text',
+                        type: type,
+                        format: 'plain-text',
+                        length: length
+                    };
+
+                    const summarizer = await self.ai.summarizer.create(options);
+                    const summary = await summarizer.summarize(selectionText, {
+                        context: 'This is a user-selected text summary.'
+                    });
+
+                    textContainer.innerHTML = '';
+                    
+                    // Create a structured container for the summary
+                    const summaryContent = document.createElement('div');
+                    summaryContent.style.cssText = `
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                        color: #2c3e50;
+                        line-height: 1.6;
+                    `;
+
+                    // Format based on summary type
+                    if (type === 'key-points') {
+                        // Split by periods and create bullet points
+                        const points = summary.split('.').filter(point => point.trim().length > 0);
+                        summaryContent.innerHTML = points.map(point => 
+                            `<p style="
+                                margin: 8px 0;
+                                padding-left: 20px;
+                                position: relative;
+                            ">
+                                <span style="
+                                    position: absolute;
+                                    left: 0;
+                                    content: '•';
+                                ">•</span>
+                                ${point.trim()}
+                            </p>`
+                        ).join('');
+                    } else if (type === 'headline') {
+                        summaryContent.innerHTML = `
+                            <h3 style="
+                                margin: 0 0 10px 0;
+                                font-size: 1.2em;
+                                font-weight: 600;
+                                color: #1a1a1a;
+                            ">${summary}</h3>`;
+                    } else {
+                        // For tl;dr and teaser, use paragraphs with proper spacing
+                        const paragraphs = summary.split('\n').filter(para => para.trim().length > 0);
+                        summaryContent.innerHTML = paragraphs.map(para =>
+                            `<p style="
+                                margin: 0 0 12px 0;
+                                text-align: justify;
+                            ">${para.trim()}</p>`
+                        ).join('');
+                    }
+
+                    textContainer.appendChild(summaryContent);
+
+                } catch (error) {
+                    console.error('Error generating summary:', error);
+                    textContainer.innerHTML = `
+                        <div style="
+                            color: #e74c3c;
+                            text-align: center;
+                            padding: 20px;
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                        ">
+                            Failed to generate summary. Please try again.
+                        </div>`;
+                }
             }
 
-            // Create Summarizer Object
-            const options = {
-                sharedContext: 'Summarizing selected text',
-                type: 'key-points', // Choose a summary type (e.g., 'key-points', 'tl;dr', etc.)
-                format: 'plain-text', // Use plain-text format
-                length: 'short' // Use short summary length
+            // Create and add controls with fixed positioning
+            const controls = createControlsUI(summaryContainer, updateSummary);
+            controls.style.cssText += `
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: white;
+                z-index: 1;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            `;
+
+            // Add components to container
+            summaryContainer.appendChild(controls);
+            summaryContainer.appendChild(textContainer);
+            box.appendChild(summaryContainer);
+
+            // Animate box expansion
+            box.style.transition = 'width 0.3s ease, height 0.3s ease';
+            box.style.width = `${BOX_CONFIG.expandedWidth}px`;
+            box.style.height = `${BOX_CONFIG.expandedHeight}px`;
+            
+            // Initial summary generation
+            setTimeout(() => {
+                summaryContainer.style.opacity = '1';
+                // Start with default options
+                updateSummary('short', 'key-points');
+            }, 300);
+
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '×';
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background: none;
+                font-size: 20px;
+                cursor: pointer;
+                color: #666666;
+                z-index: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                &:hover {
+                    background: #f0f0f0;
+                }
+            `;
+            closeButton.onclick = () => {
+                box.style.width = `${BOX_CONFIG.width}px`;
+                box.style.height = `${BOX_CONFIG.height}px`;
+                summaryContainer.remove();
+                closeButton.remove();
+                button1.style.display = 'flex';
+                button2.style.display = 'flex';
             };
-
-            let summarizer;
-            if (capabilities.available === 'readily') {
-                summarizer = await self.ai.summarizer.create(options);
-            } else if (capabilities.available === 'after-download') {
-                summarizer = await self.ai.summarizer.create(options);
-                summarizer.addEventListener('downloadprogress', (e) => {
-                    console.log(`Downloaded ${e.loaded} of ${e.total} bytes.`);
-                });
-                await summarizer.ready; // Wait for the model to finish downloading
-            }
-
-            try {
-                // Generate Summary
-                const summary = await summarizer.summarize(selectionText, {
-                    context: 'This is a user-selected text summary.'
-                });
-                alert(`Summary: ${summary}`); // Display the summary
-            } catch (error) {
-                console.error('Error generating summary:', error);
-                alert('Failed to generate summary. Please try again.');
-            }
+            box.appendChild(closeButton);
         };
 
         button2.onclick = () => {
@@ -209,3 +348,124 @@ document.addEventListener('mouseup', async function (e) {
         });
     }
 });
+
+// Add new function to create controls UI
+function createControlsUI(summaryContainer, updateSummary) {
+    const controlsDiv = document.createElement('div');
+    controlsDiv.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 12px;
+        padding-right: 40px;
+        border-bottom: 1px solid #eee;
+        height: ${BOX_CONFIG.controlsHeight}px;
+        background: white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    `;
+
+    // Length controls with active state tracking
+    const lengthControls = document.createElement('div');
+    lengthControls.style.cssText = `
+        display: flex;
+        gap: 8px;
+    `;
+
+    ['short', 'medium', 'long'].forEach(length => {
+        const button = document.createElement('button');
+        button.textContent = length;
+        button.dataset.length = length;
+        button.style.cssText = `
+            padding: 4px 12px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+            background: ${length === 'short' ? '#333' : '#fff'};
+            color: ${length === 'short' ? '#fff' : '#333'};
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        `;
+        
+        // Add click handler to update summary
+        button.onclick = () => {
+            // Update button styles
+            lengthControls.querySelectorAll('button').forEach(btn => {
+                btn.style.background = '#fff';
+                btn.style.color = '#333';
+            });
+            button.style.background = '#333';
+            button.style.color = '#fff';
+            
+            // Generate new summary with selected options
+            updateSummary(length, typeSelect.value);
+        };
+        lengthControls.appendChild(button);
+    });
+
+    // Type dropdown with change handler
+    const typeSelect = document.createElement('select');
+    typeSelect.style.cssText = `
+        padding: 4px 8px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        background: #fff;
+        cursor: pointer;
+        font-size: 12px;
+    `;
+    
+    ['key-points', 'tl;dr', 'teaser', 'headline'].forEach(type => {
+        const option = document.createElement('option');
+        option.value = type;
+        option.textContent = type.charAt(0).toUpperCase() + type.slice(1).replace('-', ' ');
+        typeSelect.appendChild(option);
+    });
+
+    // Add change handler to update summary
+    typeSelect.onchange = () => {
+        // Get currently selected length from active button
+        const activeLength = lengthControls.querySelector('button[style*="background: rgb(51, 51, 51)"]').dataset.length;
+        // Generate new summary with selected options
+        updateSummary(activeLength, typeSelect.value);
+    };
+
+    controlsDiv.appendChild(lengthControls);
+    controlsDiv.appendChild(typeSelect);
+    return controlsDiv;
+}
+
+// Add loading spinner function
+function createLoadingSpinner() {
+    const spinnerContainer = document.createElement('div');
+    spinnerContainer.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    `;
+    
+    const spinner = document.createElement('div');
+    spinner.style.cssText = `
+        width: ${BOX_CONFIG.loadingSize}px;
+        height: ${BOX_CONFIG.loadingSize}px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #333;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    `;
+    
+    spinnerContainer.appendChild(spinner);
+    
+    const keyframes = document.createElement('style');
+    keyframes.textContent = `
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(keyframes);
+    
+    return spinnerContainer;
+}
