@@ -47,20 +47,23 @@ document.addEventListener('mouseup', async function (e) {
         const updatePosition = () => {
             const updatedRect = range.getBoundingClientRect();
             const verticalCenter = updatedRect.top + (updatedRect.height / 2);
-            
-            // Calculate position to keep triangle centered during expansion
-            const expandedTop = verticalCenter - (BOX_CONFIG.expandedHeight / 2);
-            const collapsedTop = verticalCenter - (BOX_CONFIG.height / 2);
-            
-            // Use the appropriate top position based on box state
             const isExpanded = box.style.width === `${BOX_CONFIG.expandedWidth}px`;
-            const topPosition = isExpanded ? expandedTop : collapsedTop;
+            const boxHeight = isExpanded ? BOX_CONFIG.expandedHeight : BOX_CONFIG.height;
+            const topPosition = verticalCenter - (boxHeight / 2);
             
+            // Remove transition temporarily during scroll
+            box.style.transition = 'none';
             box.style.left = `${updatedRect.right + BOX_CONFIG.triangleSize + 5}px`;
             box.style.top = `${topPosition}px`;
+            
+            // Force reflow
+            box.offsetHeight;
+            
+            // Restore transition for other animations
+            box.style.transition = 'width 0.3s ease, height 0.3s ease, top 0.3s ease';
         };
 
-        // Initial box setup with transition properties
+        // Initial box setup
         box.style.cssText = `
             position: fixed;
             width: ${BOX_CONFIG.width}px;
@@ -75,7 +78,6 @@ document.addEventListener('mouseup', async function (e) {
             justify-content: space-evenly;
             align-items: center;
             padding: ${BOX_CONFIG.buttonPadding}px;
-            transition: width 0.3s ease, height 0.3s ease, top 0.3s ease;
         `;
 
         updatePosition(); // Set initial position
