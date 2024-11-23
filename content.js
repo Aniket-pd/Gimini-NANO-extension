@@ -1,7 +1,7 @@
 // Global parameters for box sizing
 const BOX_CONFIG = {
-    width: 40,          // Width of the box in pixels
-    height: 80,         // Height of the box in pixels
+    width: 80,          // Width of the box in pixels
+    height: 40,         // Height of the box in pixels
     buttonPadding: 4,   // Padding around buttons in pixels
     triangleSize: 6,     // Size of the triangle pointer in pixels
     expandedWidth: 350,  // New: width when expanded
@@ -46,21 +46,16 @@ document.addEventListener('mouseup', async function (e) {
         // Function to update box position
         const updatePosition = () => {
             const updatedRect = range.getBoundingClientRect();
-            const verticalCenter = updatedRect.top + (updatedRect.height / 2);
+            const horizontalCenter = updatedRect.left + (updatedRect.width / 2);
             const isExpanded = box.style.width === `${BOX_CONFIG.expandedWidth}px`;
-            const boxHeight = isExpanded ? BOX_CONFIG.expandedHeight : BOX_CONFIG.height;
-            const topPosition = verticalCenter - (boxHeight / 2);
+            const boxWidth = isExpanded ? BOX_CONFIG.expandedWidth : BOX_CONFIG.width;
             
-            // Remove transition temporarily during scroll
             box.style.transition = 'none';
-            box.style.left = `${updatedRect.right + BOX_CONFIG.triangleSize + 5}px`;
-            box.style.top = `${topPosition}px`;
+            box.style.left = `${horizontalCenter - (boxWidth / 2)}px`;
+            box.style.top = `${updatedRect.bottom + BOX_CONFIG.triangleSize + 5}px`;
             
-            // Force reflow
             box.offsetHeight;
-            
-            // Restore transition for other animations
-            box.style.transition = 'width 0.3s ease, height 0.3s ease, top 0.3s ease';
+            box.style.transition = 'width 0.3s ease, height 0.3s ease, left 0.3s ease';
         };
 
         // Initial box setup
@@ -74,7 +69,7 @@ document.addEventListener('mouseup', async function (e) {
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             z-index: 1000;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             justify-content: space-evenly;
             align-items: center;
             padding: ${BOX_CONFIG.buttonPadding}px;
@@ -85,12 +80,12 @@ document.addEventListener('mouseup', async function (e) {
         // When expanding the box
         const expandBox = () => {
             const rect = range.getBoundingClientRect();
-            const verticalCenter = rect.top + (rect.height / 2);
-            const expandedTop = verticalCenter - (BOX_CONFIG.expandedHeight / 2);
+            const horizontalCenter = rect.left + (rect.width / 2);
+            const expandedLeft = horizontalCenter - (BOX_CONFIG.expandedWidth / 2);
             
             box.style.width = `${BOX_CONFIG.expandedWidth}px`;
             box.style.height = `${BOX_CONFIG.expandedHeight}px`;
-            box.style.top = `${expandedTop}px`;
+            box.style.left = `${expandedLeft}px`;
         };
 
         // Add scroll event listener
@@ -114,8 +109,8 @@ document.addEventListener('mouseup', async function (e) {
 
         [button1, button2].forEach(button => {
             button.style.cssText = `
-                width: 100%;
-                height: calc((${BOX_CONFIG.height}px - ${BOX_CONFIG.buttonPadding * 3}px) / 2);
+                width: calc((${BOX_CONFIG.width}px - ${BOX_CONFIG.buttonPadding * 3}px) / 2);
+                height: calc(${BOX_CONFIG.height}px - ${BOX_CONFIG.buttonPadding * 2}px);
                 border: 1px solid #cccccc;
                 border-radius: 3px;
                 background-color: #f8f8f8;
@@ -290,9 +285,12 @@ document.addEventListener('mouseup', async function (e) {
             box.appendChild(summaryContainer);
 
             // Animate box expansion
+            const rect = range.getBoundingClientRect();
+            const horizontalCenter = rect.left + (rect.width / 2);
+            
             box.style.width = `${BOX_CONFIG.expandedWidth}px`;
             box.style.height = `${BOX_CONFIG.expandedHeight}px`;
-            box.style.top = `${rect.top + (rect.height / 2) - (BOX_CONFIG.expandedHeight / 2)}px`;
+            box.style.left = `${horizontalCenter - (BOX_CONFIG.expandedWidth / 2)}px`;
             
             // Initial summary generation
             setTimeout(() => {
@@ -326,12 +324,12 @@ document.addEventListener('mouseup', async function (e) {
             `;
             closeButton.onclick = () => {
                 const rect = range.getBoundingClientRect();
-                const verticalCenter = rect.top + (rect.height / 2);
-                const collapsedTop = verticalCenter - (BOX_CONFIG.height / 2);
+                const horizontalCenter = rect.left + (rect.width / 2);
+                const collapsedLeft = horizontalCenter - (BOX_CONFIG.width / 2);
 
                 box.style.width = `${BOX_CONFIG.width}px`;
                 box.style.height = `${BOX_CONFIG.height}px`;
-                box.style.top = `${collapsedTop}px`;
+                box.style.left = `${collapsedLeft}px`;
                 
                 summaryContainer.remove();
                 closeButton.remove();
@@ -352,27 +350,27 @@ document.addEventListener('mouseup', async function (e) {
             #selection-box::before {
                 content: '';
                 position: absolute;
-                left: -${BOX_CONFIG.triangleSize}px;
-                top: 50%;
-                transform: translateY(-50%);
+                left: 50%;
+                top: -${BOX_CONFIG.triangleSize}px;
+                transform: translateX(-50%);
                 width: 0;
                 height: 0;
-                border-top: ${BOX_CONFIG.triangleSize}px solid transparent;
-                border-bottom: ${BOX_CONFIG.triangleSize}px solid transparent;
-                border-right: ${BOX_CONFIG.triangleSize}px solid #ffffff;
+                border-left: ${BOX_CONFIG.triangleSize}px solid transparent;
+                border-right: ${BOX_CONFIG.triangleSize}px solid transparent;
+                border-bottom: ${BOX_CONFIG.triangleSize}px solid #ffffff;
                 z-index: 2;
             }
             #selection-box::after {
                 content: '';
                 position: absolute;
-                left: -${BOX_CONFIG.triangleSize + 1}px;
-                top: 50%;
-                transform: translateY(-50%);
+                left: 50%;
+                top: -${BOX_CONFIG.triangleSize + 1}px;
+                transform: translateX(-50%);
                 width: 0;
                 height: 0;
-                border-top: ${BOX_CONFIG.triangleSize}px solid transparent;
-                border-bottom: ${BOX_CONFIG.triangleSize}px solid transparent;
-                border-right: ${BOX_CONFIG.triangleSize}px solid #cccccc;
+                border-left: ${BOX_CONFIG.triangleSize}px solid transparent;
+                border-right: ${BOX_CONFIG.triangleSize}px solid transparent;
+                border-bottom: ${BOX_CONFIG.triangleSize}px solid #cccccc;
                 z-index: 1;
             }
         `;
