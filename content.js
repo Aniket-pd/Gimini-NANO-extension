@@ -6,7 +6,8 @@ const BOX_CONFIG = {
     triangleSize: 6     // Size of the triangle pointer in pixels
 };
 
-document.addEventListener('mouseup', function(e) {
+// Listen for mouseup events to trigger the selection box
+document.addEventListener('mouseup', async function (e) {
     const existingBox = document.getElementById('selection-box');
     if (existingBox && (existingBox.contains(e.target) || e.target.closest('#selection-box'))) {
         return;
@@ -18,17 +19,12 @@ document.addEventListener('mouseup', function(e) {
 
     const selection = window.getSelection();
     if (selection.toString().length > 0) {
-        console.log("happending ")
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
-        
-        // Store the initial scroll position
-        let initialScrollY = window.scrollY;
-        let initialScrollX = window.scrollX;
 
         const box = document.createElement('div');
         box.id = 'selection-box';
-        
+
         // Function to update box position
         const updatePosition = () => {
             const updatedRect = range.getBoundingClientRect();
@@ -51,23 +47,20 @@ document.addEventListener('mouseup', function(e) {
             align-items: center;
             padding: ${BOX_CONFIG.buttonPadding}px;
         `;
-        
+
         updatePosition(); // Set initial position
 
         // Add scroll event listener
         window.addEventListener('scroll', updatePosition);
-        
+
         // Create buttons with icons
-        console.log("creating buttons")
         const button1 = document.createElement('button');
         const button2 = document.createElement('button');
-        
-        // Define SVG icons
-        const copyIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>`;
 
+        // Define SVG icons
+        const summaryIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 20h9"></path><path d="M16.5 3.5l-4.5 9 4.5 3.5"></path>
+        </svg>`;
         const shareIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="18" cy="5" r="3"></circle>
             <circle cx="6" cy="12" r="3"></circle>
@@ -102,21 +95,53 @@ document.addEventListener('mouseup', function(e) {
         });
 
         // Set icons for buttons
-        button1.innerHTML = copyIcon;
+        button1.innerHTML = summaryIcon;
         button2.innerHTML = shareIcon;
 
         // Add click handlers
-        button1.onclick = () => {
-            if (navigator.clipboard) {
-                navigator.clipboard.writeText(selection.toString()).then(() => {
-                    alert('Text copied to clipboard!');
-                }).catch(err => {
-                    alert('Failed to copy text to clipboard');
-                    console.error('Could not copy text: ', err);
+        button1.onclick = async () => {
+            const selectionText = window.getSelection().toString();
+
+            if (!selectionText || selectionText.trim().length === 0) {
+                alert('No text selected!');
+                return;
+            }
+
+            // Check if Summarizer API is available
+            const capabilities = await self.ai.summarizer.capabilities();
+            if (capabilities.available === 'no') {
+                alert('Summarizer API is not available in this browser.');
+                return;
+            }
+
+            // Create Summarizer Object
+            const options = {
+                sharedContext: 'Summarizing selected text',
+                type: 'key-points', // Choose a summary type (e.g., 'key-points', 'tl;dr', etc.)
+                format: 'plain-text', // Use plain-text format
+                length: 'short' // Use short summary length
+            };
+
+            let summarizer;
+            if (capabilities.available === 'readily') {
+                summarizer = await self.ai.summarizer.create(options);
+            } else if (capabilities.available === 'after-download') {
+                summarizer = await self.ai.summarizer.create(options);
+                summarizer.addEventListener('downloadprogress', (e) => {
+                    console.log(`Downloaded ${e.loaded} of ${e.total} bytes.`);
                 });
-            } else {
-                alert('Clipboard functionality not supported in your browser');
-                console.warn('Clipboard API not supported');
+                await summarizer.ready; // Wait for the model to finish downloading
+            }
+
+            try {
+                // Generate Summary
+                const summary = await summarizer.summarize(selectionText, {
+                    context: 'This is a user-selected text summary.'
+                });
+                alert(`Summary: ${summary}`); // Display the summary
+            } catch (error) {
+                console.error('Error generating summary:', error);
+                alert('Failed to generate summary. Please try again.');
             }
         };
 
@@ -169,16 +194,14 @@ document.addEventListener('mouseup', function(e) {
             box.remove();
         };
 
-        // Update mousedown listener to use the new removeBox function
-        document.addEventListener('mousedown', function(e) {
+        // Remove box on mousedown outside or when selection changes
+        document.addEventListener('mousedown', function (e) {
             const box = document.getElementById('selection-box');
             if (box && !box.contains(e.target)) {
                 removeBox();
             }
         });
-
-        // Also remove box when selection changes
-        document.addEventListener('selectionchange', function() {
+        document.addEventListener('selectionchange', function () {
             const box = document.getElementById('selection-box');
             if (box && window.getSelection().toString().length === 0) {
                 removeBox();
