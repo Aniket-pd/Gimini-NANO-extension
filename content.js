@@ -8,6 +8,20 @@ const BOX_CONFIG = {
     expandedHeight: 400,  // New: height when expanded
     controlsHeight: 40,  // Height for the controls section
     loadingSize: 30,    // Size of loading spinner
+    fonts: {
+        headline: {
+            size: '1.2em',
+            weight: 600
+        },
+        paragraph: {
+            size: '12px',
+            lineHeight: 1.6
+        },
+        bulletPoints: {
+            size: '14px',
+            lineHeight: 1.5
+        }
+    }
 };
 
 // Listen for mouseup events to trigger the selection box
@@ -32,10 +46,21 @@ document.addEventListener('mouseup', async function (e) {
         // Function to update box position
         const updatePosition = () => {
             const updatedRect = range.getBoundingClientRect();
+            const verticalCenter = updatedRect.top + (updatedRect.height / 2);
+            
+            // Calculate position to keep triangle centered during expansion
+            const expandedTop = verticalCenter - (BOX_CONFIG.expandedHeight / 2);
+            const collapsedTop = verticalCenter - (BOX_CONFIG.height / 2);
+            
+            // Use the appropriate top position based on box state
+            const isExpanded = box.style.width === `${BOX_CONFIG.expandedWidth}px`;
+            const topPosition = isExpanded ? expandedTop : collapsedTop;
+            
             box.style.left = `${updatedRect.right + BOX_CONFIG.triangleSize + 5}px`;
-            box.style.top = `${updatedRect.top + (updatedRect.height / 2) - (BOX_CONFIG.height / 2)}px`;
+            box.style.top = `${topPosition}px`;
         };
 
+        // Initial box setup with transition properties
         box.style.cssText = `
             position: fixed;
             width: ${BOX_CONFIG.width}px;
@@ -50,9 +75,21 @@ document.addEventListener('mouseup', async function (e) {
             justify-content: space-evenly;
             align-items: center;
             padding: ${BOX_CONFIG.buttonPadding}px;
+            transition: width 0.3s ease, height 0.3s ease, top 0.3s ease;
         `;
 
         updatePosition(); // Set initial position
+
+        // When expanding the box
+        const expandBox = () => {
+            const rect = range.getBoundingClientRect();
+            const verticalCenter = rect.top + (rect.height / 2);
+            const expandedTop = verticalCenter - (BOX_CONFIG.expandedHeight / 2);
+            
+            box.style.width = `${BOX_CONFIG.expandedWidth}px`;
+            box.style.height = `${BOX_CONFIG.expandedHeight}px`;
+            box.style.top = `${expandedTop}px`;
+        };
 
         // Add scroll event listener
         window.addEventListener('scroll', updatePosition);
@@ -159,48 +196,60 @@ document.addEventListener('mouseup', async function (e) {
 
                     textContainer.innerHTML = '';
                     
-                    // Create a structured container for the summary
+                    // Clean up the summary text by removing asterisks and extra whitespace
+                    const cleanSummary = summary.replace(/\*/g, '').trim();
+                    
                     const summaryContent = document.createElement('div');
                     summaryContent.style.cssText = `
                         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
                         color: #2c3e50;
-                        line-height: 1.6;
+                        line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
+                        font-size: ${BOX_CONFIG.fonts.paragraph.size};
                     `;
 
-                    // Format based on summary type
                     if (type === 'key-points') {
-                        // Split by periods and create bullet points
-                        const points = summary.split('.').filter(point => point.trim().length > 0);
+                        // Split by periods and clean each point
+                        const points = cleanSummary.split('.')
+                            .filter(point => point.trim().length > 0)
+                            .map(point => point.trim());
+
                         summaryContent.innerHTML = points.map(point => 
                             `<p style="
                                 margin: 8px 0;
                                 padding-left: 20px;
                                 position: relative;
+                                font-size: ${BOX_CONFIG.fonts.bulletPoints.size};
+                                line-height: ${BOX_CONFIG.fonts.bulletPoints.lineHeight};
                             ">
                                 <span style="
                                     position: absolute;
                                     left: 0;
                                     content: '•';
                                 ">•</span>
-                                ${point.trim()}
+                                ${point}
                             </p>`
                         ).join('');
                     } else if (type === 'headline') {
                         summaryContent.innerHTML = `
                             <h3 style="
                                 margin: 0 0 10px 0;
-                                font-size: 1.2em;
-                                font-weight: 600;
+                                font-size: ${BOX_CONFIG.fonts.headline.size};
+                                font-weight: ${BOX_CONFIG.fonts.headline.weight};
                                 color: #1a1a1a;
-                            ">${summary}</h3>`;
+                            ">${cleanSummary}</h3>`;
                     } else {
-                        // For tl;dr and teaser, use paragraphs with proper spacing
-                        const paragraphs = summary.split('\n').filter(para => para.trim().length > 0);
+                        // For tl;dr and teaser
+                        const paragraphs = cleanSummary.split('\n')
+                            .filter(para => para.trim().length > 0)
+                            .map(para => para.trim());
+
                         summaryContent.innerHTML = paragraphs.map(para =>
                             `<p style="
                                 margin: 0 0 12px 0;
                                 text-align: justify;
-                            ">${para.trim()}</p>`
+                                font-size: ${BOX_CONFIG.fonts.paragraph.size};
+                                line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
+                            ">${para}</p>`
                         ).join('');
                     }
 
@@ -239,9 +288,9 @@ document.addEventListener('mouseup', async function (e) {
             box.appendChild(summaryContainer);
 
             // Animate box expansion
-            box.style.transition = 'width 0.3s ease, height 0.3s ease';
             box.style.width = `${BOX_CONFIG.expandedWidth}px`;
             box.style.height = `${BOX_CONFIG.expandedHeight}px`;
+            box.style.top = `${rect.top + (rect.height / 2) - (BOX_CONFIG.expandedHeight / 2)}px`;
             
             // Initial summary generation
             setTimeout(() => {
@@ -274,8 +323,14 @@ document.addEventListener('mouseup', async function (e) {
                 }
             `;
             closeButton.onclick = () => {
+                const rect = range.getBoundingClientRect();
+                const verticalCenter = rect.top + (rect.height / 2);
+                const collapsedTop = verticalCenter - (BOX_CONFIG.height / 2);
+
                 box.style.width = `${BOX_CONFIG.width}px`;
                 box.style.height = `${BOX_CONFIG.height}px`;
+                box.style.top = `${collapsedTop}px`;
+                
                 summaryContainer.remove();
                 closeButton.remove();
                 button1.style.display = 'flex';
@@ -303,6 +358,7 @@ document.addEventListener('mouseup', async function (e) {
                 border-top: ${BOX_CONFIG.triangleSize}px solid transparent;
                 border-bottom: ${BOX_CONFIG.triangleSize}px solid transparent;
                 border-right: ${BOX_CONFIG.triangleSize}px solid #ffffff;
+                z-index: 2;
             }
             #selection-box::after {
                 content: '';
@@ -315,7 +371,7 @@ document.addEventListener('mouseup', async function (e) {
                 border-top: ${BOX_CONFIG.triangleSize}px solid transparent;
                 border-bottom: ${BOX_CONFIG.triangleSize}px solid transparent;
                 border-right: ${BOX_CONFIG.triangleSize}px solid #cccccc;
-                z-index: -1;
+                z-index: 1;
             }
         `;
         document.head.appendChild(styleSheet);
