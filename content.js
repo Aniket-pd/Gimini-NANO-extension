@@ -384,7 +384,7 @@ document.addEventListener('mouseup', async function (e) {
                 align-items: center;
                 height: 100%;
                 color: #2c3e50;
-                font-size: 1.7em;
+                font-size: 2.0em;
                 font-weight: 500;
                 font-style: italic;
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -411,7 +411,7 @@ document.addEventListener('mouseup', async function (e) {
                 }
             `;
 
-            // Add typing animation styles with modern fade effect
+            // Add typing animation styles with breathing effect
             const styleSheet = document.createElement('style');
             styleSheet.textContent = `
                 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
@@ -421,25 +421,24 @@ document.addEventListener('mouseup', async function (e) {
                     50% { opacity: 0; }
                 }
 
-                @keyframes gradientText {
-                    0% {
+                @keyframes breathingGradient {
+                    0%, 100% {
                         background-position: 0% 50%;
+                        background-size: 100% 100%;
                     }
                     50% {
                         background-position: 100% 50%;
-                    }
-                    100% {
-                        background-position: 0% 50%;
+                        background-size: 200% 100%;
                     }
                 }
 
                 .typing-text {
-                    background: linear-gradient(120deg, #2c3e50, #3498db);
-                    background-size: 200% auto;
+                    background: linear-gradient(120deg, #2c3e50 0%, #3498db 50%, #2c3e50 100%);
+                    background-size: 200% 100%;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
-                    animation: gradientText 3s ease infinite;
+                    animation: breathingGradient 4s ease-in-out infinite;
                     font-style: italic;
                 }
             `;
