@@ -499,6 +499,15 @@ document.addEventListener('mouseup', async function (e) {
                             .map(para => para.trim())
                             .filter(para => para.length > 0)
                             .map(para => {
+                                // Handle bold text (**text**)
+                                para = para.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>');
+                                
+                                // Handle italic text (*text*)
+                                para = para.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>');
+                                
+                                // Remove any remaining asterisks
+                                para = para.replace(/\*/g, '');
+
                                 // Check if it's a list item
                                 if (para.startsWith('•') || para.startsWith('-') || /^\d+\./.test(para)) {
                                     return `<div style="margin: 8px 0 8px 20px;">${para}</div>`;
