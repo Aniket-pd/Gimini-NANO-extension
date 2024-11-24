@@ -431,8 +431,6 @@ document.addEventListener('mouseup', async function (e) {
                 responseArea.appendChild(spinner);
 
                 try {
-                    // Start by checking if it's possible to create a session based on the
-                    // availability of the model
                     const {available, defaultTemperature, defaultTopK} = 
                         await self.ai.languageModel.capabilities();
 
@@ -447,7 +445,6 @@ document.addEventListener('mouseup', async function (e) {
                         topK: defaultTopK
                     });
 
-                    // Get response using streaming
                     const stream = session.promptStreaming(prompt);
                     
                     // Clear spinner and prepare for response
@@ -455,14 +452,67 @@ document.addEventListener('mouseup', async function (e) {
                     let result = '';
                     let previousChunk = '';
 
-                    // Handle streaming response
+                    // Create a styled response container
+                    const responseContainer = document.createElement('div');
+                    responseContainer.style.cssText = `
+                        padding: 15px;
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                        color: #2c3e50;
+                        line-height: 1.6;
+                    `;
+
+                    // Create elements for prompt and response
+                    const promptElement = document.createElement('div');
+                    promptElement.style.cssText = `
+                        margin-bottom: 12px;
+                        padding-bottom: 8px;
+                        border-bottom: 1px solid #eee;
+                        font-weight: 500;
+                        color: #666;
+                        font-size: 0.9em;
+                    `;
+                    promptElement.textContent = `Q: ${prompt}`;
+
+                    const responseElement = document.createElement('div');
+                    responseElement.style.cssText = `
+                        white-space: pre-wrap;
+                        font-size: 14px;
+                        color: #2c3e50;
+                    `;
+
+                    // Add elements to container
+                    responseContainer.appendChild(promptElement);
+                    responseContainer.appendChild(responseElement);
+                    responseArea.appendChild(responseContainer);
+
+                    // Handle streaming response with better formatting
                     for await (const chunk of stream) {
                         const newChunk = chunk.startsWith(previousChunk)
                             ? chunk.slice(previousChunk.length)
                             : chunk;
                         
                         result += newChunk;
-                        responseArea.innerHTML = `<p>${result}</p>`;
+                        
+                        // Format the response text
+                        const formattedText = result
+                            .split('\n')
+                            .map(para => para.trim())
+                            .filter(para => para.length > 0)
+                            .map(para => {
+                                // Check if it's a list item
+                                if (para.startsWith('•') || para.startsWith('-') || /^\d+\./.test(para)) {
+                                    return `<div style="margin: 8px 0 8px 20px;">${para}</div>`;
+                                }
+                                // Check if it's a heading (starts with #)
+                                if (para.startsWith('#')) {
+                                    return `<div style="margin: 16px 0 8px 0; font-weight: 600; font-size: 1.1em;">${para.replace(/^#+ /, '')}</div>`;
+                                }
+                                // Regular paragraph
+                                return `<div style="margin: 8px 0;">${para}</div>`;
+                            })
+                            .join('');
+
+                        responseElement.innerHTML = formattedText;
                         previousChunk = chunk;
                     }
 
@@ -739,4 +789,5 @@ function createLoadingSpinner() {
     document.head.appendChild(keyframes);
     
     return spinnerContainer;
+    
 }
