@@ -339,9 +339,229 @@ document.addEventListener('mouseup', async function (e) {
             box.appendChild(closeButton);
         };
 
-        button2.onclick = () => {
-            alert('Share functionality coming soon!');
-            console.log('Share button clicked');
+        button2.onclick = async () => {
+            const selectionText = window.getSelection().toString();
+            const box = document.getElementById('selection-box');
+
+            if (!selectionText || selectionText.trim().length === 0) {
+                alert('No text selected!');
+                return;
+            }
+
+            // Hide the buttons during prompt interaction
+            button1.style.display = 'none';
+            button2.style.display = 'none';
+
+            // Create container for prompt UI
+            const promptContainer = document.createElement('div');
+            promptContainer.style.cssText = `
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            `;
+
+            // Create response area
+            const responseArea = document.createElement('div');
+            responseArea.style.cssText = `
+                padding: 20px 25px;
+                overflow-y: auto;
+                flex-grow: 1;
+                background: #ffffff;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                font-size: ${BOX_CONFIG.fonts.paragraph.size};
+                line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
+                color: #2c3e50;
+            `;
+
+            // Create input area with a form
+            const form = document.createElement('form');
+            form.style.cssText = `
+                padding: 15px;
+                border-top: 1px solid #eee;
+                display: flex;
+                gap: 10px;
+                background: #f8f8f8;
+            `;
+
+            // Prevent form submission from refreshing the page
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            };
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Enter your prompt...';
+            input.style.cssText = `
+                flex-grow: 1;
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-size: 14px;
+            `;
+
+            const sendButton = document.createElement('button');
+            sendButton.type = 'button'; // Prevent form submission
+            sendButton.textContent = 'Send';
+            sendButton.style.cssText = `
+                padding: 8px 16px;
+                background: #333;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                &:hover {
+                    background: #444;
+                }
+            `;
+
+            // Handle send button click
+            const handleSend = async () => {
+                const prompt = input.value.trim();
+                if (!prompt) return;
+
+                // Show loading spinner
+                responseArea.innerHTML = '';
+                const spinner = createLoadingSpinner();
+                responseArea.appendChild(spinner);
+
+                try {
+                    // Start by checking if it's possible to create a session based on the
+                    // availability of the model
+                    const {available, defaultTemperature, defaultTopK} = 
+                        await self.ai.languageModel.capabilities();
+
+                    if (available === 'no') {
+                        throw new Error('AI model is not available on this device');
+                    }
+
+                    // Create AI session
+                    const session = await self.ai.languageModel.create({
+                        systemPrompt: 'You are a helpful assistant analyzing the following text: ' + selectionText,
+                        temperature: defaultTemperature,
+                        topK: defaultTopK
+                    });
+
+                    // Get response using streaming
+                    const stream = session.promptStreaming(prompt);
+                    
+                    // Clear spinner and prepare for response
+                    responseArea.innerHTML = '';
+                    let result = '';
+                    let previousChunk = '';
+
+                    // Handle streaming response
+                    for await (const chunk of stream) {
+                        const newChunk = chunk.startsWith(previousChunk)
+                            ? chunk.slice(previousChunk.length)
+                            : chunk;
+                        
+                        result += newChunk;
+                        responseArea.innerHTML = `<p>${result}</p>`;
+                        previousChunk = chunk;
+                    }
+
+                    // Clean up
+                    session.destroy();
+                    input.value = '';
+
+                } catch (error) {
+                    console.error('Error generating response:', error);
+                    responseArea.innerHTML = `
+                        <div style="color: #e74c3c; padding: 20px;">
+                            Error: ${error.message}
+                        </div>
+                    `;
+                }
+            };
+
+            sendButton.onclick = handleSend;
+
+            // Handle enter key in input
+            input.onkeydown = (e) => {
+                e.stopPropagation();
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleSend();
+                }
+            };
+
+            // Add components to form
+            form.appendChild(input);
+            form.appendChild(sendButton);
+            
+            // Add components to container
+            promptContainer.appendChild(responseArea);
+            promptContainer.appendChild(form);
+            
+            // Add the container to the box
+            box.appendChild(promptContainer);
+
+            // Animate box expansion
+            expandBox();
+            
+            // Show container after animation
+            setTimeout(() => {
+                promptContainer.style.opacity = '1';
+                // Focus the input after animation
+                input.focus();
+            }, 300);
+
+            // Add close button
+            const closeButton = document.createElement('button');
+            closeButton.innerHTML = '×';
+            closeButton.style.cssText = `
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                width: 24px;
+                height: 24px;
+                border: none;
+                background: none;
+                font-size: 20px;
+                cursor: pointer;
+                color: #666666;
+                z-index: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                &:hover {
+                    background: #f0f0f0;
+                }
+            `;
+
+            closeButton.onclick = () => {
+                const rect = range.getBoundingClientRect();
+                const horizontalCenter = rect.left + (rect.width / 2);
+                const collapsedLeft = horizontalCenter - (BOX_CONFIG.width / 2);
+
+                box.style.width = `${BOX_CONFIG.width}px`;
+                box.style.height = `${BOX_CONFIG.height}px`;
+                box.style.left = `${collapsedLeft}px`;
+                
+                promptContainer.remove();
+                closeButton.remove();
+                button1.style.display = 'flex';
+                button2.style.display = 'flex';
+            };
+
+            box.appendChild(closeButton);
+
+            // Prevent box from disappearing when clicking inside
+            box.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+            }, true);
+
+            // Prevent text selection from triggering box removal when typing
+            box.addEventListener('selectstart', (e) => {
+                e.stopPropagation();
+            }, true);
         };
 
         // Add CSS for the triangle
@@ -389,17 +609,12 @@ document.addEventListener('mouseup', async function (e) {
             box.remove();
         };
 
-        // Remove box on mousedown outside or when selection changes
-        document.addEventListener('mousedown', function (e) {
+        // Modify the global mousedown handler
+        document.removeEventListener('mousedown', handleMouseDown); // Remove old handler if exists
+        document.addEventListener('mousedown', (e) => {
             const box = document.getElementById('selection-box');
-            if (box && !box.contains(e.target)) {
-                removeBox();
-            }
-        });
-        document.addEventListener('selectionchange', function () {
-            const box = document.getElementById('selection-box');
-            if (box && window.getSelection().toString().length === 0) {
-                removeBox();
+            if (box && !box.contains(e.target) && !e.target.closest('#selection-box')) {
+                box.remove();
             }
         });
     }
