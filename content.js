@@ -376,6 +376,94 @@ document.addEventListener('mouseup', async function (e) {
                 color: #2c3e50;
             `;
 
+            // Add initial welcome message with typing animation
+            const welcomeMessage = document.createElement('div');
+            welcomeMessage.style.cssText = `
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                color: #2c3e50;
+                font-size: 1.7em;
+                font-weight: 500;
+                font-style: italic;
+                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            `;
+
+            // Create the typing animation container
+            const typingContainer = document.createElement('div');
+            typingContainer.style.cssText = `
+                position: relative;
+                letter-spacing: 0.5px;
+                background: linear-gradient(120deg, #2c3e50, #3498db);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                font-style: italic;
+                &::after {
+                    content: '|';
+                    position: absolute;
+                    right: -4px;
+                    top: -2px;
+                    color: #3498db;
+                    -webkit-text-fill-color: #3498db;
+                    animation: blink 1s infinite;
+                }
+            `;
+
+            // Add typing animation styles with modern fade effect
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = `
+                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
+                
+                @keyframes blink {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0; }
+                }
+
+                @keyframes gradientText {
+                    0% {
+                        background-position: 0% 50%;
+                    }
+                    50% {
+                        background-position: 100% 50%;
+                    }
+                    100% {
+                        background-position: 0% 50%;
+                    }
+                }
+
+                .typing-text {
+                    background: linear-gradient(120deg, #2c3e50, #3498db);
+                    background-size: 200% auto;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    animation: gradientText 3s ease infinite;
+                    font-style: italic;
+                }
+            `;
+            document.head.appendChild(styleSheet);
+
+            // Function to simulate typing with modern timing
+            const typeText = async (text, element, speed = 60) => {
+                element.classList.add('typing-text');
+                for (let i = 0; i < text.length; i++) {
+                    element.textContent += text[i];
+                    // Vary the typing speed slightly for a more natural feel
+                    const variance = Math.random() * 50 - 25; // ±25ms variance
+                    await new Promise(resolve => setTimeout(resolve, speed + variance));
+                }
+            };
+
+            welcomeMessage.appendChild(typingContainer);
+            responseArea.appendChild(welcomeMessage);
+
+            // Start typing animation after the window appears
+            setTimeout(() => {
+                typeText("How can I help you?", typingContainer);
+            }, 500);
+
             // Create input area with a form
             const form = document.createElement('form');
             form.style.cssText = `
@@ -621,6 +709,14 @@ document.addEventListener('mouseup', async function (e) {
             box.addEventListener('selectstart', (e) => {
                 e.stopPropagation();
             }, true);
+
+            // Add smooth transition for the container
+            promptContainer.style.cssText += `
+                background: #ffffff;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                border-radius: 8px;
+                transition: all 0.3s ease;
+            `;
         };
 
         // Add CSS for the triangle
