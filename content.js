@@ -415,11 +415,11 @@ document.addEventListener('mouseup', async function (e) {
                 padding: 20px 25px;
                 overflow-y: auto;
                 flex-grow: 1;
-                background: #ffffff;
+                background: transparent;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
                 font-size: ${BOX_CONFIG.fonts.paragraph.size};
                 line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
-                color: #2c3e50;
+                color: ${BOX_CONFIG.colors.text.primary};
             `;
 
             // Add initial welcome message with typing animation
@@ -514,10 +514,10 @@ document.addEventListener('mouseup', async function (e) {
             const form = document.createElement('form');
             form.style.cssText = `
                 padding: 15px;
-                border-top: 1px solid #eee;
+                border-top: 1px solid ${BOX_CONFIG.colors.border};
                 display: flex;
                 gap: 10px;
-                background: #f8f8f8;
+                background: transparent;
             `;
 
             // Prevent form submission from refreshing the page
@@ -533,24 +533,44 @@ document.addEventListener('mouseup', async function (e) {
             input.style.cssText = `
                 flex-grow: 1;
                 padding: 8px 12px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid ${BOX_CONFIG.colors.border};
+                border-radius: 8px;
                 font-size: 14px;
+                color: ${BOX_CONFIG.colors.text.primary};
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                transition: all 0.2s ease;
+                &::placeholder {
+                    color: ${BOX_CONFIG.colors.text.secondary};
+                }
+                &:focus {
+                    outline: none;
+                    background: rgba(255, 255, 255, 0.1);
+                    border-color: rgba(255, 255, 255, 0.2);
+                }
             `;
 
             const sendButton = document.createElement('button');
-            sendButton.type = 'button'; // Prevent form submission
+            sendButton.type = 'button';
             sendButton.textContent = 'Send';
             sendButton.style.cssText = `
                 padding: 8px 16px;
-                background: #333;
-                color: white;
-                border: none;
-                border-radius: 4px;
+                background: rgba(255, 255, 255, 0.1);
+                color: ${BOX_CONFIG.colors.button.text};
+                border: 1px solid ${BOX_CONFIG.colors.border};
+                border-radius: 8px;
                 cursor: pointer;
                 font-size: 14px;
+                backdrop-filter: blur(8px);
+                -webkit-backdrop-filter: blur(8px);
+                transition: all 0.2s ease;
                 &:hover {
-                    background: #444;
+                    background: rgba(255, 255, 255, 0.2);
+                    transform: translateY(-1px);
+                }
+                &:active {
+                    transform: translateY(0px);
                 }
             `;
 
@@ -760,7 +780,7 @@ document.addEventListener('mouseup', async function (e) {
 
             // Add smooth transition for the container
             promptContainer.style.cssText += `
-                background: #ffffff;
+                background: transparent;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
                 border-radius: 8px;
                 transition: all 0.3s ease;
