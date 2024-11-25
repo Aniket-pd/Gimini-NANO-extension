@@ -659,6 +659,9 @@ document.addEventListener('mouseup', async function (e) {
                         font-weight: 500;
                         color: ${BOX_CONFIG.colors.text.generated.prompt};
                         font-size: 0.9em;
+                        opacity: 0;
+                        transform: translateY(10px);
+                        animation: fadeIn 0.3s ease forwards;
                     `;
                     promptElement.textContent = `Q: ${prompt}`;
 
@@ -675,43 +678,58 @@ document.addEventListener('mouseup', async function (e) {
                     responseArea.appendChild(responseContainer);
 
                     // Handle streaming response with better formatting
+                    let previousContent = '';
+                    const responseContent = document.createElement('div');
+                    responseElement.appendChild(responseContent);
+
                     for await (const chunk of stream) {
-                        const newChunk = chunk.startsWith(previousChunk)
-                            ? chunk.slice(previousChunk.length)
+                        const newChunk = chunk.startsWith(previousContent)
+                            ? chunk.slice(previousContent.length)
                             : chunk;
                         
-                        result += newChunk;
-                        
-                        // Format the response text
-                        const formattedText = result
-                            .split('\n')
-                            .map(para => para.trim())
-                            .filter(para => para.length > 0)
-                            .map(para => {
+                        if (newChunk) {
+                            // Create a new element for the chunk
+                            const chunkElement = document.createElement('span');
+                            chunkElement.style.cssText = `
+                                opacity: 0;
+                                transform: translateY(5px);
+                                animation: fadeIn 0.3s ease forwards;
+                                display: inline;
+                            `;
+                            
+                            // Handle formatting for the new chunk
+                            let formattedChunk = newChunk
                                 // Handle bold text (**text**)
-                                para = para.replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>');
-                                
+                                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>')
                                 // Handle italic text (*text*)
-                                para = para.replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>');
-                                
+                                .replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>')
                                 // Remove any remaining asterisks
-                                para = para.replace(/\*/g, '');
+                                .replace(/\*/g, '');
 
-                                // Check if it's a list item
-                                if (para.startsWith('•') || para.startsWith('-') || /^\d+\./.test(para)) {
-                                    return `<div style="margin: 8px 0 8px 20px;">${para}</div>`;
-                                }
-                                // Check if it's a heading (starts with #)
-                                if (para.startsWith('#')) {
-                                    return `<div style="margin: 16px 0 8px 0; font-weight: 600; font-size: 1.1em;">${para.replace(/^#+ /, '')}</div>`;
-                                }
-                                // Regular paragraph
-                                return `<div style="margin: 8px 0;">${para}</div>`;
-                            })
-                            .join('');
+                            chunkElement.innerHTML = formattedChunk;
+                            responseContent.appendChild(chunkElement);
+                        }
 
-                        responseElement.innerHTML = formattedText;
-                        previousChunk = chunk;
+                        // Add keyframe animation for fadeIn if not already present
+                        if (!document.querySelector('#fadeInAnimation')) {
+                            const styleSheet = document.createElement('style');
+                            styleSheet.id = 'fadeInAnimation';
+                            styleSheet.textContent = `
+                                @keyframes fadeIn {
+                                    from {
+                                        opacity: 0;
+                                        transform: translateY(5px);
+                                    }
+                                    to {
+                                        opacity: 1;
+                                        transform: translateY(0);
+                                    }
+                                }
+                            `;
+                            document.head.appendChild(styleSheet);
+                        }
+
+                        previousContent = chunk;
                     }
 
                     // Clean up
