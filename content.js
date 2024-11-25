@@ -8,6 +8,28 @@ const BOX_CONFIG = {
     expandedHeight: 400,  // New: height when expanded
     controlsHeight: 40,  // Height for the controls section
     loadingSize: 30,    // Size of loading spinner
+    colors: {
+        background: 'rgba(23, 25, 35, 0.85)',
+        border: 'rgba(255, 255, 255, 0.1)',
+        text: {
+            primary: '#ffffff',
+            secondary: '#a0a0a0',
+            generated: {
+                heading: '#e2e8f0',
+                paragraph: '#cbd5e1',
+                bullet: '#94a3b8',
+                prompt: '#9ca3af',
+                response: '#d1d5db',
+                highlight: '#60a5fa',
+                error: '#ef4444'
+            }
+        },
+        button: {
+            background: 'rgba(255, 255, 255, 0.1)',
+            hover: 'rgba(255, 255, 255, 0.2)',
+            text: '#ffffff'
+        }
+    },
     fonts: {
         headline: {
             size: '1.2em',
@@ -63,10 +85,12 @@ document.addEventListener('mouseup', async function (e) {
             position: fixed;
             width: ${BOX_CONFIG.width}px;
             height: ${BOX_CONFIG.height}px;
-            background-color: #ffffff;
-            border: 1px solid #cccccc;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: ${BOX_CONFIG.colors.background};
+            border: 1px solid ${BOX_CONFIG.colors.border};
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             z-index: 1000;
             display: flex;
             flex-direction: row;
@@ -111,24 +135,24 @@ document.addEventListener('mouseup', async function (e) {
             button.style.cssText = `
                 width: calc((${BOX_CONFIG.width}px - ${BOX_CONFIG.buttonPadding * 3}px) / 2);
                 height: calc(${BOX_CONFIG.height}px - ${BOX_CONFIG.buttonPadding * 2}px);
-                border: 1px solid #cccccc;
-                border-radius: 3px;
-                background-color: #f8f8f8;
+                border: 1px solid ${BOX_CONFIG.colors.border};
+                border-radius: 8px;
+                background: ${BOX_CONFIG.colors.button.background};
                 cursor: pointer;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 padding: 0;
-                transition: background-color 0.2s;
-                color: #666666;
+                transition: all 0.2s ease;
+                color: ${BOX_CONFIG.colors.button.text};
             `;
             button.onmouseover = () => {
-                button.style.backgroundColor = '#eeeeee';
-                button.style.color = '#333333';
+                button.style.background = BOX_CONFIG.colors.button.hover;
+                button.style.transform = 'translateY(-2px)';
             };
             button.onmouseout = () => {
-                button.style.backgroundColor = '#f8f8f8';
-                button.style.color = '#666666';
+                button.style.background = BOX_CONFIG.colors.button.background;
+                button.style.transform = 'translateY(0)';
             };
         });
 
@@ -169,8 +193,25 @@ document.addEventListener('mouseup', async function (e) {
                 margin-top: ${BOX_CONFIG.controlsHeight + 10}px;
                 position: relative;
                 min-height: 200px;
-                background: #ffffff;
-                border-radius: 0 0 4px 4px;
+                background: ${BOX_CONFIG.colors.background};
+                color: ${BOX_CONFIG.colors.text.primary};
+                border-radius: 0 0 12px 12px;
+
+                /* Scrollbar styling */
+                &::-webkit-scrollbar {
+                    width: 8px;
+                }
+                &::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-radius: 4px;
+                }
+                &::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 4px;
+                    &:hover {
+                        background: rgba(255, 255, 255, 0.3);
+                    }
+                }
             `;
 
             async function updateSummary(length, type) {
@@ -217,11 +258,13 @@ document.addEventListener('mouseup', async function (e) {
                                 position: relative;
                                 font-size: ${BOX_CONFIG.fonts.bulletPoints.size};
                                 line-height: ${BOX_CONFIG.fonts.bulletPoints.lineHeight};
+                                color: ${BOX_CONFIG.colors.text.generated.bullet};
                             ">
                                 <span style="
                                     position: absolute;
                                     left: 0;
                                     content: '•';
+                                    color: ${BOX_CONFIG.colors.text.generated.highlight};
                                 ">•</span>
                                 ${point}
                             </p>`
@@ -232,7 +275,7 @@ document.addEventListener('mouseup', async function (e) {
                                 margin: 0 0 10px 0;
                                 font-size: ${BOX_CONFIG.fonts.headline.size};
                                 font-weight: ${BOX_CONFIG.fonts.headline.weight};
-                                color: #1a1a1a;
+                                color: ${BOX_CONFIG.colors.text.generated.heading};
                             ">${cleanSummary}</h3>`;
                     } else {
                         // For tl;dr and teaser
@@ -246,6 +289,7 @@ document.addEventListener('mouseup', async function (e) {
                                 text-align: justify;
                                 font-size: ${BOX_CONFIG.fonts.paragraph.size};
                                 line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
+                                color: ${BOX_CONFIG.colors.text.generated.paragraph};
                             ">${para}</p>`
                         ).join('');
                     }
@@ -256,7 +300,7 @@ document.addEventListener('mouseup', async function (e) {
                     console.error('Error generating summary:', error);
                     textContainer.innerHTML = `
                         <div style="
-                            color: #e74c3c;
+                            color: ${BOX_CONFIG.colors.text.generated.error};
                             text-align: center;
                             padding: 20px;
                             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
@@ -273,10 +317,10 @@ document.addEventListener('mouseup', async function (e) {
                 top: 0;
                 left: 0;
                 right: 0;
-                background: white;
+                background: ${BOX_CONFIG.colors.background};
                 z-index: 1;
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
+                border-top-left-radius: 12px;
+                border-top-right-radius: 12px;
             `;
 
             // Add components to container
@@ -309,17 +353,19 @@ document.addEventListener('mouseup', async function (e) {
                 width: 24px;
                 height: 24px;
                 border: none;
-                background: none;
+                background: rgba(255, 255, 255, 0.1);
                 font-size: 20px;
                 cursor: pointer;
-                color: #666666;
+                color: ${BOX_CONFIG.colors.text.primary};
                 z-index: 2;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: 50%;
+                transition: all 0.2s;
                 &:hover {
-                    background: #f0f0f0;
+                    background: rgba(255, 255, 255, 0.2);
+                    transform: rotate(90deg);
                 }
             `;
             closeButton.onclick = () => {
@@ -384,7 +430,7 @@ document.addEventListener('mouseup', async function (e) {
                 align-items: center;
                 height: 100%;
                 color: #2c3e50;
-                font-size: 2.0em;
+                font-size: 1.7em;
                 font-weight: 500;
                 font-style: italic;
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -411,7 +457,7 @@ document.addEventListener('mouseup', async function (e) {
                 }
             `;
 
-            // Add typing animation styles with breathing effect
+            // Add typing animation styles with modern fade effect
             const styleSheet = document.createElement('style');
             styleSheet.textContent = `
                 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
@@ -421,24 +467,25 @@ document.addEventListener('mouseup', async function (e) {
                     50% { opacity: 0; }
                 }
 
-                @keyframes breathingGradient {
-                    0%, 100% {
+                @keyframes gradientText {
+                    0% {
                         background-position: 0% 50%;
-                        background-size: 100% 100%;
                     }
                     50% {
                         background-position: 100% 50%;
-                        background-size: 200% 100%;
+                    }
+                    100% {
+                        background-position: 0% 50%;
                     }
                 }
 
                 .typing-text {
-                    background: linear-gradient(120deg, #2c3e50 0%, #3498db 50%, #2c3e50 100%);
-                    background-size: 200% 100%;
+                    background: linear-gradient(120deg, #2c3e50, #3498db);
+                    background-size: 200% auto;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
-                    animation: breathingGradient 4s ease-in-out infinite;
+                    animation: gradientText 3s ease infinite;
                     font-style: italic;
                 }
             `;
@@ -553,9 +600,9 @@ document.addEventListener('mouseup', async function (e) {
                     promptElement.style.cssText = `
                         margin-bottom: 12px;
                         padding-bottom: 8px;
-                        border-bottom: 1px solid #eee;
+                        border-bottom: 1px solid ${BOX_CONFIG.colors.border};
                         font-weight: 500;
-                        color: #666;
+                        color: ${BOX_CONFIG.colors.text.generated.prompt};
                         font-size: 0.9em;
                     `;
                     promptElement.textContent = `Q: ${prompt}`;
@@ -564,7 +611,7 @@ document.addEventListener('mouseup', async function (e) {
                     responseElement.style.cssText = `
                         white-space: pre-wrap;
                         font-size: 14px;
-                        color: #2c3e50;
+                        color: ${BOX_CONFIG.colors.text.generated.response};
                     `;
 
                     // Add elements to container
@@ -668,17 +715,19 @@ document.addEventListener('mouseup', async function (e) {
                 width: 24px;
                 height: 24px;
                 border: none;
-                background: none;
+                background: rgba(255, 255, 255, 0.1);
                 font-size: 20px;
                 cursor: pointer;
-                color: #666666;
+                color: ${BOX_CONFIG.colors.text.primary};
                 z-index: 2;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: 50%;
+                transition: all 0.2s;
                 &:hover {
-                    background: #f0f0f0;
+                    background: rgba(255, 255, 255, 0.2);
+                    transform: rotate(90deg);
                 }
             `;
 
@@ -731,7 +780,7 @@ document.addEventListener('mouseup', async function (e) {
                 height: 0;
                 border-left: ${BOX_CONFIG.triangleSize}px solid transparent;
                 border-right: ${BOX_CONFIG.triangleSize}px solid transparent;
-                border-bottom: ${BOX_CONFIG.triangleSize}px solid #ffffff;
+                border-bottom: ${BOX_CONFIG.triangleSize}px solid rgba(23, 25, 35, 0.85);
                 z-index: 2;
             }
             #selection-box::after {
@@ -744,7 +793,7 @@ document.addEventListener('mouseup', async function (e) {
                 height: 0;
                 border-left: ${BOX_CONFIG.triangleSize}px solid transparent;
                 border-right: ${BOX_CONFIG.triangleSize}px solid transparent;
-                border-bottom: ${BOX_CONFIG.triangleSize}px solid #cccccc;
+                border-bottom: ${BOX_CONFIG.triangleSize}px solid rgba(255, 255, 255, 0.1);
                 z-index: 1;
             }
         `;
@@ -783,10 +832,11 @@ function createControlsUI(summaryContainer, updateSummary) {
         align-items: center;
         padding: 8px 12px;
         padding-right: 40px;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid ${BOX_CONFIG.colors.border};
         height: ${BOX_CONFIG.controlsHeight}px;
-        background: white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        background: ${BOX_CONFIG.colors.background};
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border-radius: 12px 12px 0 0;
     `;
 
     // Length controls with active state tracking
@@ -803,12 +853,16 @@ function createControlsUI(summaryContainer, updateSummary) {
         button.style.cssText = `
             padding: 4px 12px;
             border-radius: 15px;
-            border: 1px solid #ccc;
-            background: ${length === 'short' ? '#333' : '#fff'};
-            color: ${length === 'short' ? '#fff' : '#333'};
+            border: 1px solid ${BOX_CONFIG.colors.border};
+            background: ${length === 'short' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
+            color: ${BOX_CONFIG.colors.text.primary};
             cursor: pointer;
             font-size: 12px;
             transition: all 0.2s;
+            &:hover {
+                background: rgba(255, 255, 255, 0.25);
+                transform: translateY(-1px);
+            }
         `;
         
         // Add click handler to update summary
@@ -830,12 +884,22 @@ function createControlsUI(summaryContainer, updateSummary) {
     // Type dropdown with change handler
     const typeSelect = document.createElement('select');
     typeSelect.style.cssText = `
-        padding: 4px 8px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        background: #fff;
+        padding: 4px 12px;
+        border-radius: 8px;
+        border: 1px solid ${BOX_CONFIG.colors.border};
+        background: rgba(255, 255, 255, 0.1);
+        color: ${BOX_CONFIG.colors.text.primary};
         cursor: pointer;
         font-size: 12px;
+        outline: none;
+        transition: all 0.2s;
+        &:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        & option {
+            background: ${BOX_CONFIG.colors.background};
+            color: ${BOX_CONFIG.colors.text.primary};
+        }
     `;
     
     ['key-points', 'tl;dr', 'teaser', 'headline'].forEach(type => {
@@ -847,11 +911,28 @@ function createControlsUI(summaryContainer, updateSummary) {
 
     // Add change handler to update summary
     typeSelect.onchange = () => {
-        // Get currently selected length from active button
-        const activeLength = lengthControls.querySelector('button[style*="background: rgb(51, 51, 51)"]').dataset.length;
+        // Find the active length button
+        const activeButton = lengthControls.querySelector('button[style*="background: rgba(255, 255, 255, 0.2)"]') || 
+                           lengthControls.querySelector('button[data-length="short"]'); // fallback to 'short' if none active
+        const activeLength = activeButton.dataset.length;
+        
         // Generate new summary with selected options
         updateSummary(activeLength, typeSelect.value);
     };
+
+    // Update length button click handler
+    lengthControls.querySelectorAll('button').forEach(btn => {
+        btn.onclick = () => {
+            // Update button styles
+            lengthControls.querySelectorAll('button').forEach(b => {
+                b.style.background = 'rgba(255, 255, 255, 0.1)';
+            });
+            btn.style.background = 'rgba(255, 255, 255, 0.2)';
+            
+            // Generate new summary with selected options
+            updateSummary(btn.dataset.length, typeSelect.value);
+        };
+    });
 
     controlsDiv.appendChild(lengthControls);
     controlsDiv.appendChild(typeSelect);
