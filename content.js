@@ -243,6 +243,9 @@ document.addEventListener('mouseup', async function (e) {
                         color: #2c3e50;
                         line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
                         font-size: ${BOX_CONFIG.fonts.paragraph.size};
+                        opacity: 0;
+                        transform: translateY(10px);
+                        transition: opacity 0.5s ease, transform 0.5s ease;
                     `;
 
                     if (type === 'key-points') {
@@ -259,6 +262,9 @@ document.addEventListener('mouseup', async function (e) {
                                 font-size: ${BOX_CONFIG.fonts.bulletPoints.size};
                                 line-height: ${BOX_CONFIG.fonts.bulletPoints.lineHeight};
                                 color: ${BOX_CONFIG.colors.text.generated.bullet};
+                                opacity: 0;
+                                transform: translateY(10px);
+                                transition: opacity 0.3s ease, transform 0.3s ease;
                             ">
                                 <span style="
                                     position: absolute;
@@ -276,6 +282,9 @@ document.addEventListener('mouseup', async function (e) {
                                 font-size: ${BOX_CONFIG.fonts.headline.size};
                                 font-weight: ${BOX_CONFIG.fonts.headline.weight};
                                 color: ${BOX_CONFIG.colors.text.generated.heading};
+                                opacity: 0;
+                                transform: translateY(10px);
+                                transition: opacity 0.3s ease, transform 0.3s ease;
                             ">${cleanSummary}</h3>`;
                     } else {
                         // For tl;dr and teaser
@@ -290,11 +299,29 @@ document.addEventListener('mouseup', async function (e) {
                                 font-size: ${BOX_CONFIG.fonts.paragraph.size};
                                 line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
                                 color: ${BOX_CONFIG.colors.text.generated.paragraph};
+                                opacity: 0;
+                                transform: translateY(10px);
+                                transition: opacity 0.3s ease, transform 0.3s ease;
                             ">${para}</p>`
                         ).join('');
                     }
 
                     textContainer.appendChild(summaryContent);
+
+                    // Trigger the animation after a brief delay
+                    requestAnimationFrame(() => {
+                        summaryContent.style.opacity = '1';
+                        summaryContent.style.transform = 'translateY(0)';
+                        
+                        // Animate each paragraph/point with a stagger effect
+                        const elements = summaryContent.children;
+                        Array.from(elements).forEach((element, index) => {
+                            setTimeout(() => {
+                                element.style.opacity = '1';
+                                element.style.transform = 'translateY(0)';
+                            }, index * 100); // 100ms delay between each element
+                        });
+                    });
 
                 } catch (error) {
                     console.error('Error generating summary:', error);
@@ -304,9 +331,18 @@ document.addEventListener('mouseup', async function (e) {
                             text-align: center;
                             padding: 20px;
                             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                            opacity: 0;
+                            transform: translateY(10px);
+                            transition: opacity 0.3s ease, transform 0.3s ease;
                         ">
                             Failed to generate summary. Please try again.
                         </div>`;
+                    
+                    // Animate error message
+                    requestAnimationFrame(() => {
+                        textContainer.children[0].style.opacity = '1';
+                        textContainer.children[0].style.transform = 'translateY(0)';
+                    });
                 }
             }
 
@@ -432,7 +468,6 @@ document.addEventListener('mouseup', async function (e) {
                 color: #2c3e50;
                 font-size: 1.7em;
                 font-weight: 500;
-                font-style: italic;
                 font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             `;
 
@@ -445,7 +480,7 @@ document.addEventListener('mouseup', async function (e) {
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
-                font-style: italic;
+                font-weight: bold;
                 &::after {
                     content: '|';
                     position: absolute;
@@ -460,7 +495,7 @@ document.addEventListener('mouseup', async function (e) {
             // Add typing animation styles with modern fade effect
             const styleSheet = document.createElement('style');
             styleSheet.textContent = `
-                @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
                 
                 @keyframes blink {
                     0%, 100% { opacity: 1; }
@@ -486,7 +521,7 @@ document.addEventListener('mouseup', async function (e) {
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
                     animation: gradientText 3s ease infinite;
-                    font-style: italic;
+                    font-weight: bold;
                 }
             `;
             document.head.appendChild(styleSheet);
