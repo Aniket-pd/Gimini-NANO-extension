@@ -68,12 +68,14 @@ document.addEventListener('mouseup', async function (e) {
     }
 
     const selection = window.getSelection();
-    if (selection.toString().length > 0) {
+    const selectionText = selection.toString().trim();
+    if (selectionText.length > 0) {
         const range = selection.getRangeAt(0);
         const rect = range.getBoundingClientRect();
 
         const box = document.createElement('div');
         box.id = 'selection-box';
+        box.dataset.selectedText = selectionText;
 
         // Function to update box position
         const updatePosition = () => {
@@ -172,10 +174,10 @@ document.addEventListener('mouseup', async function (e) {
 
         // Add click handlers
         button1.onclick = async () => {
-            const selectionText = window.getSelection().toString();
             const box = document.getElementById('selection-box');
+            const selectionText = box.dataset.selectedText;
 
-            if (!selectionText || selectionText.trim().length === 0) {
+            if (!selectionText) {
                 alert('No text selected!');
                 return;
             }
@@ -432,10 +434,10 @@ document.addEventListener('mouseup', async function (e) {
         };
 
         button2.onclick = async () => {
-            const selectionText = window.getSelection().toString();
             const box = document.getElementById('selection-box');
+            const selectionText = box.dataset.selectedText;
 
-            if (!selectionText || selectionText.trim().length === 0) {
+            if (!selectionText) {
                 alert('No text selected!');
                 return;
             }
@@ -622,7 +624,6 @@ document.addEventListener('mouseup', async function (e) {
                 &:focus {
                     outline: none;
                     background: rgba(255, 255, 255, 0.1);
-                    border: none;
                 }
             `;
 
@@ -931,6 +932,7 @@ document.addEventListener('mouseup', async function (e) {
         document.addEventListener('mousedown', (e) => {
             const box = document.getElementById('selection-box');
             if (box && !box.contains(e.target) && !e.target.closest('#selection-box')) {
+                box.dataset.selectedText = '';  // Clear stored selection
                 box.remove();
             }
         });
