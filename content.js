@@ -8,6 +8,16 @@ const BOX_CONFIG = {
     expandedHeight: 400,  // New: height when expanded
     controlsHeight: 40,  // Height for the controls section
     loadingSize: 30,    // Size of loading spinner
+    welcomeMessage: {
+        gradientColors: {
+            primary: '#FF9A9E',
+            secondary: '#FECFEF'
+        },
+        animationDuration: '6s',  // Slower animation (in seconds)
+        typingSpeed: 60,          // Typing speed (in milliseconds)
+        fontSize: '2.2em',        // Font size control
+        fontWeight: 100          // Add font weight control (400=normal, 500=medium, 600=semibold, 700=bold)
+    },
     colors: {
         background: 'rgba(23, 25, 35, 0.85)',
         border: 'rgba(255, 255, 255, 0.1)',
@@ -42,45 +52,6 @@ const BOX_CONFIG = {
         bulletPoints: {
             size: '14px',
             lineHeight: 1.5
-        }
-    },
-    headerMenu: {
-        height: 45,          // Height of the header menu
-        padding: {
-            vertical: 8,     // Vertical padding for the menu
-            horizontal: 12,  // Horizontal padding for the menu
-            rightOffset: 40  // Right padding to account for close button
-        },
-        buttons: {
-            padding: {
-                vertical: 4,    // Vertical padding for buttons
-                horizontal: 12  // Horizontal padding for buttons
-            },
-            gap: 8,            // Gap between buttons
-            borderRadius: 15,   // Border radius for buttons
-            fontSize: 12,       // Font size for button text
-        },
-        dropdown: {
-            padding: {
-                vertical: 4,    // Vertical padding for dropdown
-                horizontal: 12  // Horizontal padding for dropdown
-            },
-            borderRadius: 8     // Border radius for dropdown
-        },
-        colors: {
-            background: 'rgba(23, 25, 35, 0.95)',  // Menu background
-            border: 'rgba(255, 255, 255, 0.1)',    // Border color
-            button: {
-                default: 'rgba(255, 255, 255, 0.1)',    // Default button background
-                active: 'rgba(255, 255, 255, 0.3)',     // Active button background
-                hover: 'rgba(255, 255, 255, 0.25)',     // Hover button background
-                text: '#F1F1F1'                         // Button text color
-            },
-            dropdown: {
-                background: 'rgba(255, 255, 255, 0.1)', // Dropdown background
-                hover: 'rgba(255, 255, 255, 0.15)',     // Dropdown hover background
-                text: '#F1F1F1'                         // Dropdown text color
-            }
         }
     }
 };
@@ -505,9 +476,9 @@ document.addEventListener('mouseup', async function (e) {
                 align-items: center;
                 height: 100%;
                 color: #2c3e50;
-                font-size: 1.7em;
-                font-weight: 500;
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: ${BOX_CONFIG.welcomeMessage.fontSize};
+                font-weight: ${BOX_CONFIG.welcomeMessage.fontWeight};
+                font-family: 'Playfair Display', serif;
             `;
 
             // Create the typing animation container
@@ -515,18 +486,24 @@ document.addEventListener('mouseup', async function (e) {
             typingContainer.style.cssText = `
                 position: relative;
                 letter-spacing: 0.5px;
-                background: linear-gradient(120deg, #2c3e50, #3498db);
+                background: linear-gradient(270deg, 
+                    ${BOX_CONFIG.welcomeMessage.gradientColors.primary},
+                    ${BOX_CONFIG.welcomeMessage.gradientColors.secondary},
+                    ${BOX_CONFIG.welcomeMessage.gradientColors.primary}
+                );
+                background-size: 200% 100%;
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 background-clip: text;
-                font-weight: bold;
+                font-weight: ${BOX_CONFIG.welcomeMessage.fontWeight};
+                font-family: 'Playfair Display', serif;
                 &::after {
                     content: '|';
                     position: absolute;
                     right: -4px;
                     top: -2px;
-                    color: #3498db;
-                    -webkit-text-fill-color: #3498db;
+                    color: ${BOX_CONFIG.welcomeMessage.gradientColors.secondary};
+                    -webkit-text-fill-color: ${BOX_CONFIG.welcomeMessage.gradientColors.secondary};
                     animation: blink 1s infinite;
                 }
             `;
@@ -534,7 +511,7 @@ document.addEventListener('mouseup', async function (e) {
             // Add typing animation styles with modern fade effect
             const styleSheet = document.createElement('style');
             styleSheet.textContent = `
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
                 
                 @keyframes blink {
                     0%, 100% { opacity: 1; }
@@ -554,23 +531,45 @@ document.addEventListener('mouseup', async function (e) {
                 }
 
                 .typing-text {
-                    background: linear-gradient(120deg, #2c3e50, #3498db);
-                    background-size: 200% auto;
+                    background: linear-gradient(270deg, 
+                        ${BOX_CONFIG.welcomeMessage.gradientColors.primary},
+                        ${BOX_CONFIG.welcomeMessage.gradientColors.secondary},
+                        ${BOX_CONFIG.welcomeMessage.gradientColors.primary}
+                    );
+                    background-size: 200% 100%;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
-                    animation: gradientText 3s ease infinite;
-                    font-weight: bold;
+                    animation: gradientText ${BOX_CONFIG.welcomeMessage.animationDuration} ease infinite;
+                    font-weight: ${BOX_CONFIG.welcomeMessage.fontWeight};
+                    font-family: 'Playfair Display', serif;
                 }
             `;
             document.head.appendChild(styleSheet);
 
             // Function to simulate typing with modern timing
-            const typeText = async (text, element, speed = 60) => {
+            const typeText = async (text, element, speed = BOX_CONFIG.welcomeMessage.typingSpeed) => {
                 element.classList.add('typing-text');
-                for (let i = 0; i < text.length; i++) {
-                    element.textContent += text[i];
-                    // Vary the typing speed slightly for a more natural feel
+                
+                // Split the text into styled and unstyled parts
+                const italicPart = "hey,";
+                const regularPart = " there!";
+                
+                // Create span for italic part
+                const italicSpan = document.createElement('span');
+                italicSpan.style.fontStyle = 'italic';
+                
+                // Type the italic part
+                for (let i = 0; i < italicPart.length; i++) {
+                    italicSpan.textContent += italicPart[i];
+                    element.appendChild(italicSpan);
+                    const variance = Math.random() * 50 - 25; // ±25ms variance
+                    await new Promise(resolve => setTimeout(resolve, speed + variance));
+                }
+                
+                // Type the regular part
+                for (let i = 0; i < regularPart.length; i++) {
+                    element.appendChild(document.createTextNode(regularPart[i]));
                     const variance = Math.random() * 50 - 25; // ±25ms variance
                     await new Promise(resolve => setTimeout(resolve, speed + variance));
                 }
@@ -581,7 +580,7 @@ document.addEventListener('mouseup', async function (e) {
 
             // Start typing animation after the window appears
             setTimeout(() => {
-                typeText("How can I help you?", typingContainer);
+                typeText("hey, there!", typingContainer);
             }, 500);
 
             // Create input area with a form
@@ -603,7 +602,7 @@ document.addEventListener('mouseup', async function (e) {
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.placeholder = 'Enter your prompt...';
+            input.placeholder = 'Ask Snip..';
             input.style.cssText = `
                 flex-grow: 1;
                 padding: 8px 12px;
@@ -942,19 +941,20 @@ function createControlsUI(summaryContainer, updateSummary) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: ${BOX_CONFIG.headerMenu.padding.vertical}px ${BOX_CONFIG.headerMenu.padding.horizontal}px;
-        padding-right: ${BOX_CONFIG.headerMenu.padding.rightOffset}px;
-        border-bottom: 1px solid ${BOX_CONFIG.headerMenu.colors.border};
-        height: ${BOX_CONFIG.headerMenu.height}px;
-        background: ${BOX_CONFIG.headerMenu.colors.background};
+        padding: 8px 12px;
+        padding-right: 40px;
+        border-bottom: 1px solid ${BOX_CONFIG.colors.border};
+        height: ${BOX_CONFIG.controlsHeight}px;
+        background: ${BOX_CONFIG.colors.background};
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         border-radius: 12px 12px 0 0;
     `;
 
+    // Length controls with active state tracking
     const lengthControls = document.createElement('div');
     lengthControls.style.cssText = `
         display: flex;
-        gap: ${BOX_CONFIG.headerMenu.buttons.gap}px;
+        gap: 8px;
     `;
 
     ['short', 'medium', 'long'].forEach(length => {
@@ -962,42 +962,57 @@ function createControlsUI(summaryContainer, updateSummary) {
         button.textContent = length;
         button.dataset.length = length;
         button.style.cssText = `
-            padding: ${BOX_CONFIG.headerMenu.buttons.padding.vertical}px ${BOX_CONFIG.headerMenu.buttons.padding.horizontal}px;
-            border-radius: ${BOX_CONFIG.headerMenu.buttons.borderRadius}px;
-            border: 1px solid ${BOX_CONFIG.headerMenu.colors.border};
-            background: ${length === 'short' ? BOX_CONFIG.headerMenu.colors.button.active : BOX_CONFIG.headerMenu.colors.button.default};
-            color: ${BOX_CONFIG.headerMenu.colors.button.text};
+            padding: 4px 12px;
+            border-radius: 15px;
+            border: 1px solid ${BOX_CONFIG.colors.border};
+            background: ${length === 'short' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
+            color: ${BOX_CONFIG.colors.text.primary};
             cursor: pointer;
-            font-size: ${BOX_CONFIG.headerMenu.buttons.fontSize}px;
+            font-size: 12px;
             transition: all 0.2s;
             &:hover {
-                background: ${BOX_CONFIG.headerMenu.colors.button.hover};
+                background: rgba(255, 255, 255, 0.25);
                 transform: translateY(-1px);
             }
         `;
+        
+        // Add click handler to update summary
+        button.onclick = () => {
+            // Update button styles
+            lengthControls.querySelectorAll('button').forEach(btn => {
+                btn.style.background = '#fff';
+                btn.style.color = '#333';
+            });
+            button.style.background = '#333';
+            button.style.color = '#fff';
+            
+            // Generate new summary with selected options
+            updateSummary(length, typeSelect.value);
+        };
         lengthControls.appendChild(button);
     });
 
+    // Type dropdown with change handler
     const typeSelect = document.createElement('select');
     typeSelect.style.cssText = `
-        padding: ${BOX_CONFIG.headerMenu.dropdown.padding.vertical}px ${BOX_CONFIG.headerMenu.dropdown.padding.horizontal}px;
-        border-radius: ${BOX_CONFIG.headerMenu.dropdown.borderRadius}px;
-        border: 1px solid ${BOX_CONFIG.headerMenu.colors.border};
-        background: ${BOX_CONFIG.headerMenu.colors.dropdown.background};
-        color: ${BOX_CONFIG.headerMenu.colors.dropdown.text};
+        padding: 4px 12px;
+        border-radius: 8px;
+        border: 1px solid ${BOX_CONFIG.colors.border};
+        background: rgba(255, 255, 255, 0.1);
+        color: ${BOX_CONFIG.colors.text.primary};
         cursor: pointer;
-        font-size: ${BOX_CONFIG.headerMenu.buttons.fontSize}px;
+        font-size: 12px;
         outline: none;
         transition: all 0.2s;
         &:hover {
-            background: ${BOX_CONFIG.headerMenu.colors.dropdown.hover};
+            background: rgba(255, 255, 255, 0.15);
         }
         & option {
             background: ${BOX_CONFIG.colors.background};
-            color: ${BOX_CONFIG.headerMenu.colors.dropdown.text};
+            color: ${BOX_CONFIG.colors.text.primary};
         }
     `;
-
+    
     ['key-points', 'tl;dr', 'teaser', 'headline'].forEach(type => {
         const option = document.createElement('option');
         option.value = type;
