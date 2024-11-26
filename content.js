@@ -602,48 +602,51 @@ document.addEventListener('mouseup', async function (e) {
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.placeholder = 'Ask Snip..';
+            input.placeholder = 'Ask Snip !';
             input.style.cssText = `
                 flex-grow: 1;
-                padding: 8px 12px;
+                padding: 8px 35px 8px 12px;
                 background: rgba(255, 255, 255, 0.05);
-                border: 1px solid ${BOX_CONFIG.colors.border};
-                border-radius: 8px;
+                border: none;
+                border-radius: 20px;
                 font-size: 14px;
                 color: ${BOX_CONFIG.colors.text.primary};
                 backdrop-filter: blur(8px);
                 -webkit-backdrop-filter: blur(8px);
                 transition: all 0.2s ease;
+                width: 100%;
+                outline: none;
                 &::placeholder {
-                    color: ${BOX_CONFIG.colors.text.secondary};
+                    color: rgba(255, 255, 255, 0.5);
                 }
                 &:focus {
                     outline: none;
                     background: rgba(255, 255, 255, 0.1);
-                    border-color: rgba(255, 255, 255, 0.2);
+                    border: none;
                 }
             `;
 
             const sendButton = document.createElement('button');
-            sendButton.type = 'button';
-            sendButton.textContent = 'Send';
+            sendButton.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            `;
             sendButton.style.cssText = `
-                padding: 8px 16px;
-                background: rgba(255, 255, 255, 0.1);
-                color: ${BOX_CONFIG.colors.button.text};
-                border: 1px solid ${BOX_CONFIG.colors.border};
-                border-radius: 8px;
+                position: absolute;
+                right: 25px;
+                background: transparent;
+                border: none;
+                padding: 8px;
                 cursor: pointer;
-                font-size: 14px;
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
+                color: ${BOX_CONFIG.colors.button.text};
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 transition: all 0.2s ease;
                 &:hover {
-                    background: rgba(255, 255, 255, 0.2);
-                    transform: translateY(-1px);
-                }
-                &:active {
-                    transform: translateY(0px);
+                    transform: translateX(2px);
                 }
             `;
 
