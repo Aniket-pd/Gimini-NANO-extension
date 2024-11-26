@@ -4,8 +4,8 @@ const BOX_CONFIG = {
     height: 40,         // Height of the box in pixels
     buttonPadding: 4,   // Padding around buttons in pixels
     triangleSize: 6,     // Size of the triangle pointer in pixels
-    expandedWidth: 350,  // New: width when expanded
-    expandedHeight: 400,  // New: height when expanded
+    expandedWidth: 400,  // New: width when expanded
+    expandedHeight: 450,  // New: height when expanded
     controlsHeight: 40,  // Height for the controls section
     loadingSize: 30,    // Size of loading spinner
     welcomeMessage: {
@@ -14,7 +14,7 @@ const BOX_CONFIG = {
             secondary: '#FECFEF'
         },
         animationDuration: '6s',  // Slower animation (in seconds)
-        typingSpeed: 60,          // Typing speed (in milliseconds)
+        typingSpeed: 80,          // Typing speed (in milliseconds)
         fontSize: '2.2em',        // Font size control
         fontWeight: 100          // Add font weight control (400=normal, 500=medium, 600=semibold, 700=bold)
     },
@@ -455,9 +455,38 @@ document.addEventListener('mouseup', async function (e) {
                 flex-direction: column;
                 opacity: 0;
                 transition: opacity 0.3s ease;
+                position: relative;
             `;
 
-            // Create response area
+            // Modify header section styles
+            const headerSection = document.createElement('div');
+            headerSection.style.cssText = `
+                position: sticky;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                padding: 0 15px;
+                z-index: 10;
+                border-radius: 12px 12px 0 0;
+                border-bottom: 1px solid ${BOX_CONFIG.colors.border};
+            `;
+
+            // Add title to header
+            const headerTitle = document.createElement('div');
+            headerTitle.textContent = 'Chat';
+            headerTitle.style.cssText = `
+                color: ${BOX_CONFIG.colors.text.primary};
+                font-size: 14px;
+                font-weight: 500;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            `;
+
+            headerSection.appendChild(headerTitle);
+
+            // Modify responseArea styles to work with header
             const responseArea = document.createElement('div');
             responseArea.style.cssText = `
                 padding: 20px 25px;
@@ -468,6 +497,8 @@ document.addEventListener('mouseup', async function (e) {
                 font-size: ${BOX_CONFIG.fonts.paragraph.size};
                 line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
                 color: ${BOX_CONFIG.colors.text.primary};
+                margin-top: 0;
+                height: calc(100% - 40px - 66px);
             `;
 
             // Add initial welcome message with typing animation
@@ -803,7 +834,8 @@ document.addEventListener('mouseup', async function (e) {
             form.appendChild(input);
             form.appendChild(sendButton);
             
-            // Add components to container
+            // Update the component assembly order
+            promptContainer.appendChild(headerSection);
             promptContainer.appendChild(responseArea);
             promptContainer.appendChild(form);
             
@@ -834,7 +866,7 @@ document.addEventListener('mouseup', async function (e) {
                 font-size: 20px;
                 cursor: pointer;
                 color: ${BOX_CONFIG.colors.text.primary};
-                z-index: 2;
+                z-index: 20;
                 display: flex;
                 align-items: center;
                 justify-content: center;
