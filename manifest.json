@@ -1,22 +1,21 @@
 {
-    "manifest_version": 3,
-    "name": "Text Selection Button",
-    "version": "1.0",
-    "description": "Shows a button near selected text.",
-    "permissions": ["activeTab", "scripting", "storage", "aiOriginTrial"],
-    "host_permissions": ["<all_urls>"],
-    // "background": {
-    //   "service_worker": "background.js"
-    // },
-    "content_scripts": [
-      {
-        "matches": ["<all_urls>"],
-        "js": ["content.js"],
-        "css": ["styles.css"]
-      }
-    ],
-    "origin_trial": {
-      "token": "YOUR_ORIGIN_TRIAL_TOKEN"
+  "manifest_version": 3,
+  "name": "Text Selection Button",
+  "version": "1.0",
+  "description": "Shows a button near selected text.",
+  "permissions": ["activeTab", "scripting", "storage", "aiOriginTrial"],
+  "host_permissions": ["<all_urls>"],
+  // "background": {
+  //   "service_worker": "background.js"
+  // },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"]
     }
+  ],
+  "origin_trial": {
+    "token": "YOUR_ORIGIN_TRIAL_TOKEN"
   }
-  
+}

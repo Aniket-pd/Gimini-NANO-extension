@@ -43,6 +43,45 @@ const BOX_CONFIG = {
             size: '14px',
             lineHeight: 1.5
         }
+    },
+    headerMenu: {
+        height: 45,          // Height of the header menu
+        padding: {
+            vertical: 8,     // Vertical padding for the menu
+            horizontal: 12,  // Horizontal padding for the menu
+            rightOffset: 40  // Right padding to account for close button
+        },
+        buttons: {
+            padding: {
+                vertical: 4,    // Vertical padding for buttons
+                horizontal: 12  // Horizontal padding for buttons
+            },
+            gap: 8,            // Gap between buttons
+            borderRadius: 15,   // Border radius for buttons
+            fontSize: 12,       // Font size for button text
+        },
+        dropdown: {
+            padding: {
+                vertical: 4,    // Vertical padding for dropdown
+                horizontal: 12  // Horizontal padding for dropdown
+            },
+            borderRadius: 8     // Border radius for dropdown
+        },
+        colors: {
+            background: 'rgba(23, 25, 35, 0.95)',  // Menu background
+            border: 'rgba(255, 255, 255, 0.1)',    // Border color
+            button: {
+                default: 'rgba(255, 255, 255, 0.1)',    // Default button background
+                active: 'rgba(255, 255, 255, 0.3)',     // Active button background
+                hover: 'rgba(255, 255, 255, 0.25)',     // Hover button background
+                text: '#F1F1F1'                         // Button text color
+            },
+            dropdown: {
+                background: 'rgba(255, 255, 255, 0.1)', // Dropdown background
+                hover: 'rgba(255, 255, 255, 0.15)',     // Dropdown hover background
+                text: '#F1F1F1'                         // Dropdown text color
+            }
+        }
     }
 };
 
@@ -903,20 +942,19 @@ function createControlsUI(summaryContainer, updateSummary) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 8px 12px;
-        padding-right: 40px;
-        border-bottom: 1px solid ${BOX_CONFIG.colors.border};
-        height: ${BOX_CONFIG.controlsHeight}px;
-        background: ${BOX_CONFIG.colors.background};
+        padding: ${BOX_CONFIG.headerMenu.padding.vertical}px ${BOX_CONFIG.headerMenu.padding.horizontal}px;
+        padding-right: ${BOX_CONFIG.headerMenu.padding.rightOffset}px;
+        border-bottom: 1px solid ${BOX_CONFIG.headerMenu.colors.border};
+        height: ${BOX_CONFIG.headerMenu.height}px;
+        background: ${BOX_CONFIG.headerMenu.colors.background};
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         border-radius: 12px 12px 0 0;
     `;
 
-    // Length controls with active state tracking
     const lengthControls = document.createElement('div');
     lengthControls.style.cssText = `
         display: flex;
-        gap: 8px;
+        gap: ${BOX_CONFIG.headerMenu.buttons.gap}px;
     `;
 
     ['short', 'medium', 'long'].forEach(length => {
@@ -924,57 +962,42 @@ function createControlsUI(summaryContainer, updateSummary) {
         button.textContent = length;
         button.dataset.length = length;
         button.style.cssText = `
-            padding: 4px 12px;
-            border-radius: 15px;
-            border: 1px solid ${BOX_CONFIG.colors.border};
-            background: ${length === 'short' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.1)'};
-            color: ${BOX_CONFIG.colors.text.primary};
+            padding: ${BOX_CONFIG.headerMenu.buttons.padding.vertical}px ${BOX_CONFIG.headerMenu.buttons.padding.horizontal}px;
+            border-radius: ${BOX_CONFIG.headerMenu.buttons.borderRadius}px;
+            border: 1px solid ${BOX_CONFIG.headerMenu.colors.border};
+            background: ${length === 'short' ? BOX_CONFIG.headerMenu.colors.button.active : BOX_CONFIG.headerMenu.colors.button.default};
+            color: ${BOX_CONFIG.headerMenu.colors.button.text};
             cursor: pointer;
-            font-size: 12px;
+            font-size: ${BOX_CONFIG.headerMenu.buttons.fontSize}px;
             transition: all 0.2s;
             &:hover {
-                background: rgba(255, 255, 255, 0.25);
+                background: ${BOX_CONFIG.headerMenu.colors.button.hover};
                 transform: translateY(-1px);
             }
         `;
-        
-        // Add click handler to update summary
-        button.onclick = () => {
-            // Update button styles
-            lengthControls.querySelectorAll('button').forEach(btn => {
-                btn.style.background = '#fff';
-                btn.style.color = '#333';
-            });
-            button.style.background = '#333';
-            button.style.color = '#fff';
-            
-            // Generate new summary with selected options
-            updateSummary(length, typeSelect.value);
-        };
         lengthControls.appendChild(button);
     });
 
-    // Type dropdown with change handler
     const typeSelect = document.createElement('select');
     typeSelect.style.cssText = `
-        padding: 4px 12px;
-        border-radius: 8px;
-        border: 1px solid ${BOX_CONFIG.colors.border};
-        background: rgba(255, 255, 255, 0.1);
-        color: ${BOX_CONFIG.colors.text.primary};
+        padding: ${BOX_CONFIG.headerMenu.dropdown.padding.vertical}px ${BOX_CONFIG.headerMenu.dropdown.padding.horizontal}px;
+        border-radius: ${BOX_CONFIG.headerMenu.dropdown.borderRadius}px;
+        border: 1px solid ${BOX_CONFIG.headerMenu.colors.border};
+        background: ${BOX_CONFIG.headerMenu.colors.dropdown.background};
+        color: ${BOX_CONFIG.headerMenu.colors.dropdown.text};
         cursor: pointer;
-        font-size: 12px;
+        font-size: ${BOX_CONFIG.headerMenu.buttons.fontSize}px;
         outline: none;
         transition: all 0.2s;
         &:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: ${BOX_CONFIG.headerMenu.colors.dropdown.hover};
         }
         & option {
             background: ${BOX_CONFIG.colors.background};
-            color: ${BOX_CONFIG.colors.text.primary};
+            color: ${BOX_CONFIG.headerMenu.colors.dropdown.text};
         }
     `;
-    
+
     ['key-points', 'tl;dr', 'teaser', 'headline'].forEach(type => {
         const option = document.createElement('option');
         option.value = type;
