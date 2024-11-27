@@ -4,8 +4,8 @@ const BOX_CONFIG = {
     height: 40,         // Height of the box in pixels
     buttonPadding: 4,   // Padding around buttons in pixels
     triangleSize: 6,     // Size of the triangle pointer in pixels
-    expandedWidth: 400,  // New: width when expanded
-    expandedHeight: 450,  // New: height when expanded
+    expandedWidth: 375,  // New: width when expanded
+    expandedHeight: 425,  // New: height when expanded
     controlsHeight: 40,  // Height for the controls section
     loadingSize: 30,    // Size of loading spinner
     welcomeMessage: {
@@ -53,7 +53,13 @@ const BOX_CONFIG = {
             size: '14px',
             lineHeight: 1.5
         }
-    }
+    },
+    blur: {
+        backdrop: 12,          // Backdrop blur intensity (px)
+        border: 1,           // Border glow blur intensity (px)
+        overlayGradient: 2,  // Blur for gradient overlays (px)
+        shadowSpread: 32,    // Shadow blur spread (px)
+    },
 };
 
 // Listen for mouseup events to trigger the selection box
@@ -100,9 +106,9 @@ document.addEventListener('mouseup', async function (e) {
             background: ${BOX_CONFIG.colors.background};
             border: 1px solid ${BOX_CONFIG.colors.border};
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            box-shadow: 0 8px ${BOX_CONFIG.blur.shadowSpread}px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(${BOX_CONFIG.blur.backdrop}px);
+            -webkit-backdrop-filter: blur(${BOX_CONFIG.blur.backdrop}px);
             z-index: 1000;
             display: flex;
             flex-direction: row;
@@ -539,7 +545,7 @@ document.addEventListener('mouseup', async function (e) {
                         border-radius: 12px;
                         pointer-events: none;
                         animation: borderLight 2s linear forwards;
-                        filter: blur(1px);
+                        filter: blur(${BOX_CONFIG.blur.border}px);
                     }
                 `;
                 document.head.appendChild(styleSheet);
@@ -727,6 +733,7 @@ document.addEventListener('mouseup', async function (e) {
                 );
                 pointer-events: none; // Allow clicking through the overlay
                 z-index: 5;
+                filter: blur(${BOX_CONFIG.blur.overlayGradient}px);
             `;
 
             // Update form to include the blur overlay
