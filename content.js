@@ -19,7 +19,7 @@ const BOX_CONFIG = {
         fontWeight: 100          // Add font weight control (400=normal, 500=medium, 600=semibold, 700=bold)
     },
     colors: {
-        background: 'rgba(23, 25, 35, 0.85)',
+        background: 'rgba(34, 34, 34, 0.7)',
         border: 'rgba(255, 255, 255, 0.1)',
         text: {
             primary: '#ffffff',
@@ -133,14 +133,10 @@ document.addEventListener('mouseup', async function (e) {
 
         // Define SVG icons
         const summaryIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M12 20h9"></path><path d="M16.5 3.5l-4.5 9 4.5 3.5"></path>
+            <path d="M4 6h16M4 12h16M4 18h7"></path>
         </svg>`;
         const shareIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="18" cy="5" r="3"></circle>
-            <circle cx="6" cy="12" r="3"></circle>
-            <circle cx="18" cy="19" r="3"></circle>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
         </svg>`;
 
         [button1, button2].forEach(button => {
@@ -205,7 +201,7 @@ document.addEventListener('mouseup', async function (e) {
                 margin-top: ${BOX_CONFIG.controlsHeight + 10}px;
                 position: relative;
                 min-height: 200px;
-                background: ${BOX_CONFIG.colors.background};
+                background: transparent;
                 color: ${BOX_CONFIG.colors.text.primary};
                 border-radius: 0 0 12px 12px;
 
@@ -397,22 +393,24 @@ document.addEventListener('mouseup', async function (e) {
             closeButton.style.cssText = `
                 position: absolute;
                 top: 8px;
-                right: 8px;
-                width: 24px;
-                height: 24px;
+                right: 12px;
+                width: 20px;
+                height: 20px;
                 border: none;
-                background: rgba(255, 255, 255, 0.1);
-                font-size: 20px;
+                background: transparent;
+                font-size: 18px;
+                line-height: 1;
                 cursor: pointer;
                 color: ${BOX_CONFIG.colors.text.primary};
-                z-index: 2;
+                z-index: 20;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 50%;
                 transition: all 0.2s;
+                opacity: 0.6;
+                padding: 0;
                 &:hover {
-                    background: rgba(255, 255, 255, 0.2);
+                    opacity: 1;
                     transform: rotate(90deg);
                 }
             `;
@@ -455,9 +453,16 @@ document.addEventListener('mouseup', async function (e) {
                 flex-direction: column;
                 opacity: 0;
                 transition: opacity 0.3s ease;
-                position: relative;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
                 border: 1px solid transparent;
                 animation: borderLight 2s linear forwards;
+                border-radius: 12px;
+                overflow: hidden;
+                background: transparent;
             `;
 
             // Add the animation styles
@@ -467,59 +472,86 @@ document.addEventListener('mouseup', async function (e) {
                 styleSheet.textContent = `
                     @keyframes borderLight {
                         0% {
-                            border-image: linear-gradient(
-                                to right,
+                            border-image-source: radial-gradient(
+                                circle at 0% 50%,
                                 transparent 0%,
-                                transparent 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 25%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
                                 transparent 100%
-                            ) 1;
+                            );
+                            border-image-slice: 1;
+                            border-radius: 12px;
                         }
                         25% {
-                            border-image: linear-gradient(
-                                to bottom,
+                            border-image-source: radial-gradient(
+                                circle at 50% 100%,
                                 transparent 0%,
-                                transparent 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 25%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
                                 transparent 100%
-                            ) 1;
+                            );
+                            border-image-slice: 1;
+                            border-radius: 12px;
                         }
                         50% {
-                            border-image: linear-gradient(
-                                to left,
+                            border-image-source: radial-gradient(
+                                circle at 100% 50%,
                                 transparent 0%,
-                                transparent 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 25%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
                                 transparent 100%
-                            ) 1;
+                            );
+                            border-image-slice: 1;
+                            border-radius: 12px;
                         }
                         75% {
-                            border-image: linear-gradient(
-                                to top,
+                            border-image-source: radial-gradient(
+                                circle at 50% 0%,
                                 transparent 0%,
-                                transparent 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 25%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
                                 transparent 100%
-                            ) 1;
+                            );
+                            border-image-slice: 1;
+                            border-radius: 12px;
                         }
                         100% {
-                            border-image: linear-gradient(
-                                to right,
-                                transparent 0%,
+                            border-image-source: radial-gradient(
+                                circle at 0% 50%,
+                                transparent 100%,
                                 transparent 100%,
                                 transparent 100%,
                                 transparent 100%,
                                 transparent 100%
-                            ) 1;
+                            );
+                            border-image-slice: 1;
+                            border-radius: 12px;
                         }
+                    }
+
+                    /* Add a pseudo-element for the curved border animation */
+                    .prompt-container::before {
+                        content: '';
+                        position: absolute;
+                        top: -1px;
+                        left: -1px;
+                        right: -1px;
+                        bottom: -1px;
+                        border: 1px solid transparent;
+                        border-radius: 12px;
+                        pointer-events: none;
+                        animation: borderLight 2s linear forwards;
                     }
                 `;
                 document.head.appendChild(styleSheet);
             }
+
+            // Add the class to the promptContainer
+            promptContainer.classList.add('prompt-container');
 
             // Modify header section styles
             const headerSection = document.createElement('div');
@@ -553,6 +585,7 @@ document.addEventListener('mouseup', async function (e) {
             const responseArea = document.createElement('div');
             responseArea.style.cssText = `
                 padding: 20px 25px;
+                padding-bottom: 80px;
                 overflow-y: auto;
                 flex-grow: 1;
                 background: transparent;
@@ -561,7 +594,12 @@ document.addEventListener('mouseup', async function (e) {
                 line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
                 color: ${BOX_CONFIG.colors.text.primary};
                 margin-top: 0;
-                height: calc(100% - 40px - 66px);
+                height: calc(100% - 70px);
+                position: relative;
+                z-index: 1;
+                margin-bottom: 60px;
+                mask-image: linear-gradient(to bottom, black calc(100% - 100px), transparent 100%);
+                -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 100px), transparent 100%);
             `;
 
             // Add initial welcome message with typing animation
@@ -679,7 +717,24 @@ document.addEventListener('mouseup', async function (e) {
                 typeText("hey, there!", typingContainer);
             }, 500);
 
-            // Create input area with a form
+            // Add a blur gradient overlay above the input container
+            const blurOverlay = document.createElement('div');
+            blurOverlay.style.cssText = `
+                position: absolute;
+                bottom: 60px; // Adjust based on your input container height
+                left: 0;
+                right: 0;
+                height: 40px; // Height of blur gradient
+                background: linear-gradient(
+                    to bottom,
+                    transparent,
+                    ${BOX_CONFIG.colors.background} 90%
+                );
+                pointer-events: none; // Allow clicking through the overlay
+                z-index: 5;
+            `;
+
+            // Update form to include the blur overlay
             const form = document.createElement('form');
             form.style.cssText = `
                 padding: 15px;
@@ -687,28 +742,35 @@ document.addEventListener('mouseup', async function (e) {
                 display: flex;
                 gap: 10px;
                 background: transparent;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                box-sizing: border-box;
+                z-index: 10;
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
             `;
 
-            // Prevent form submission from refreshing the page
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            };
+            // Add the blur overlay before the form
+            promptContainer.appendChild(blurOverlay);
+            promptContainer.appendChild(form);
 
+            // Add components to form
             const input = document.createElement('input');
             input.type = 'text';
             input.placeholder = 'Ask Snip !';
             input.style.cssText = `
                 flex-grow: 1;
                 padding: 8px 35px 8px 12px;
-                background: rgba(255, 255, 255, 0.05);
+                background: transparent;
                 border: none;
                 border-radius: 20px;
                 font-size: 14px;
                 color: ${BOX_CONFIG.colors.text.primary};
-                backdrop-filter: blur(8px);
-                -webkit-backdrop-filter: blur(8px);
+                backdrop-filter: none;
+                -webkit-backdrop-filter: none;
                 transition: all 0.2s ease;
                 width: 100%;
                 outline: none;
@@ -717,7 +779,7 @@ document.addEventListener('mouseup', async function (e) {
                 }
                 &:focus {
                     outline: none;
-                    background: rgba(255, 255, 255, 0.1);
+                    background: transparent;
                 }
             `;
 
@@ -735,7 +797,7 @@ document.addEventListener('mouseup', async function (e) {
                 border: none;
                 padding: 8px;
                 cursor: pointer;
-                color: ${BOX_CONFIG.colors.button.text};
+                color: ${BOX_CONFIG.colors.text.primary};
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -921,22 +983,24 @@ document.addEventListener('mouseup', async function (e) {
             closeButton.style.cssText = `
                 position: absolute;
                 top: 8px;
-                right: 8px;
-                width: 24px;
-                height: 24px;
+                right: 12px;
+                width: 20px;
+                height: 20px;
                 border: none;
-                background: rgba(255, 255, 255, 0.1);
-                font-size: 20px;
+                background: transparent;
+                font-size: 18px;
+                line-height: 1;
                 cursor: pointer;
                 color: ${BOX_CONFIG.colors.text.primary};
                 z-index: 20;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 50%;
                 transition: all 0.2s;
+                opacity: 0.6;
+                padding: 0;
                 &:hover {
-                    background: rgba(255, 255, 255, 0.2);
+                    opacity: 1;
                     transform: rotate(90deg);
                 }
             `;
