@@ -60,6 +60,21 @@ const BOX_CONFIG = {
         overlayGradient: 2,  // Blur for gradient overlays (px)
         shadowSpread: 32,    // Shadow blur spread (px)
     },
+    glow: {
+        intensity: {
+            border: '0.6',      // Border glow opacity (0-1)
+            shadow: '0.3',      // Shadow glow opacity (0-1)
+            highlight: '0.9'    // Highlight glow opacity (0-1)
+        },
+        colors: {
+            primary: '#FF9A9E',
+            secondary: '#FECFEF'
+        },
+        animation: {
+            duration: '2s',
+            timing: 'linear'
+        }
+    },
 };
 
 // Listen for mouseup events to trigger the selection box
@@ -482,44 +497,44 @@ document.addEventListener('mouseup', async function (e) {
                                 circle at 0% 50%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
+                                ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 50%,
+                                ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 75%,
                                 transparent 100%
                             );
-                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.primary}55;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
                         }
                         25% {
                             border-image-source: radial-gradient(
                                 circle at 50% 100%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
+                                ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 50%,
+                                ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 75%,
                                 transparent 100%
                             );
-                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}55;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
                         }
                         50% {
                             border-image-source: radial-gradient(
                                 circle at 100% 50%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
+                                ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 50%,
+                                ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 75%,
                                 transparent 100%
                             );
-                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.primary}55;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
                         }
                         75% {
                             border-image-source: radial-gradient(
                                 circle at 50% 0%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
+                                ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 50%,
+                                ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)} 75%,
                                 transparent 100%
                             );
-                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}55;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
                         }
                         100% {
                             border-image-source: radial-gradient(
@@ -544,7 +559,7 @@ document.addEventListener('mouseup', async function (e) {
                         border: 1px solid transparent;
                         border-radius: 12px;
                         pointer-events: none;
-                        animation: borderLight 2s linear forwards;
+                        animation: borderLight ${BOX_CONFIG.glow.animation.duration} ${BOX_CONFIG.glow.animation.timing} forwards;
                         filter: blur(${BOX_CONFIG.blur.border}px);
                     }
                 `;
