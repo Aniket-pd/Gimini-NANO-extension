@@ -476,48 +476,44 @@ document.addEventListener('mouseup', async function (e) {
                                 circle at 0% 50%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
                                 transparent 100%
                             );
-                            border-image-slice: 1;
-                            border-radius: 12px;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.primary}55;
                         }
                         25% {
                             border-image-source: radial-gradient(
                                 circle at 50% 100%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
                                 transparent 100%
                             );
-                            border-image-slice: 1;
-                            border-radius: 12px;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}55;
                         }
                         50% {
                             border-image-source: radial-gradient(
                                 circle at 100% 50%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
                                 transparent 100%
                             );
-                            border-image-slice: 1;
-                            border-radius: 12px;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.primary}55;
                         }
                         75% {
                             border-image-source: radial-gradient(
                                 circle at 50% 0%,
                                 transparent 0%,
                                 transparent 25%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 50%,
-                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 75%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary}aa 50%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}aa 75%,
                                 transparent 100%
                             );
-                            border-image-slice: 1;
-                            border-radius: 12px;
+                            box-shadow: 0 0 15px ${BOX_CONFIG.welcomeMessage.gradientColors.secondary}55;
                         }
                         100% {
                             border-image-source: radial-gradient(
@@ -528,12 +524,10 @@ document.addEventListener('mouseup', async function (e) {
                                 transparent 100%,
                                 transparent 100%
                             );
-                            border-image-slice: 1;
-                            border-radius: 12px;
+                            box-shadow: none;
                         }
                     }
 
-                    /* Add a pseudo-element for the curved border animation */
                     .prompt-container::before {
                         content: '';
                         position: absolute;
@@ -545,6 +539,7 @@ document.addEventListener('mouseup', async function (e) {
                         border-radius: 12px;
                         pointer-events: none;
                         animation: borderLight 2s linear forwards;
+                        filter: blur(1px);
                     }
                 `;
                 document.head.appendChild(styleSheet);
