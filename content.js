@@ -456,7 +456,70 @@ document.addEventListener('mouseup', async function (e) {
                 opacity: 0;
                 transition: opacity 0.3s ease;
                 position: relative;
+                border: 1px solid transparent;
+                animation: borderLight 2s linear forwards;
             `;
+
+            // Add the animation styles
+            if (!document.querySelector('#borderLightAnimation')) {
+                const styleSheet = document.createElement('style');
+                styleSheet.id = 'borderLightAnimation';
+                styleSheet.textContent = `
+                    @keyframes borderLight {
+                        0% {
+                            border-image: linear-gradient(
+                                to right,
+                                transparent 0%,
+                                transparent 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 100%
+                            ) 1;
+                        }
+                        25% {
+                            border-image: linear-gradient(
+                                to bottom,
+                                transparent 0%,
+                                transparent 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 100%
+                            ) 1;
+                        }
+                        50% {
+                            border-image: linear-gradient(
+                                to left,
+                                transparent 0%,
+                                transparent 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 100%
+                            ) 1;
+                        }
+                        75% {
+                            border-image: linear-gradient(
+                                to top,
+                                transparent 0%,
+                                transparent 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.primary} 0%,
+                                ${BOX_CONFIG.welcomeMessage.gradientColors.secondary} 50%,
+                                transparent 100%
+                            ) 1;
+                        }
+                        100% {
+                            border-image: linear-gradient(
+                                to right,
+                                transparent 0%,
+                                transparent 100%,
+                                transparent 100%,
+                                transparent 100%,
+                                transparent 100%
+                            ) 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+            }
 
             // Modify header section styles
             const headerSection = document.createElement('div');
@@ -912,6 +975,59 @@ document.addEventListener('mouseup', async function (e) {
                 border-radius: 8px;
                 transition: all 0.3s ease;
             `;
+
+            // Add this to the styleSheet creation in the button2.onclick handler
+            // (where we already have the fadeIn animation)
+            if (!document.querySelector('#shineAnimation')) {
+                const styleSheet = document.createElement('style');
+                styleSheet.id = 'shineAnimation';
+                styleSheet.textContent = `
+                    @keyframes noisyShine {
+                        0% {
+                            border-image: linear-gradient(
+                                45deg,
+                                rgba(255, 255, 255, 0.1) 0%,
+                                rgba(255, 154, 158, 0.2) 25%,
+                                rgba(254, 207, 239, 0.2) 50%,
+                                rgba(255, 154, 158, 0.2) 75%,
+                                rgba(255, 255, 255, 0.1) 100%
+                            ) 1;
+                            filter: url('#noise');
+                        }
+                        50% {
+                            border-image: linear-gradient(
+                                45deg,
+                                rgba(255, 255, 255, 0.1) 100%,
+                                rgba(255, 154, 158, 0.2) 0%,
+                                rgba(254, 207, 239, 0.2) 25%,
+                                rgba(255, 154, 158, 0.2) 50%,
+                                rgba(255, 255, 255, 0.1) 75%
+                            ) 1;
+                            filter: url('#noise');
+                        }
+                        100% {
+                            border-image: linear-gradient(
+                                45deg,
+                                rgba(255, 255, 255, 0.1) 0%,
+                                rgba(255, 154, 158, 0.2) 25%,
+                                rgba(254, 207, 239, 0.2) 50%,
+                                rgba(255, 154, 158, 0.2) 75%,
+                                rgba(255, 255, 255, 0.1) 100%
+                            ) 1;
+                            filter: url('#noise');
+                        }
+                    }
+
+                    /* Add SVG noise filter */
+                    <svg style="display: none;">
+                        <filter id="noise">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/>
+                            <feDisplacementMap in="SourceGraphic" scale="2"/>
+                        </filter>
+                    }
+                `;
+                document.head.appendChild(styleSheet);
+            }
         };
 
         // Add CSS for the triangle
