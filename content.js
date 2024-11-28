@@ -62,9 +62,9 @@ const BOX_CONFIG = {
     },
     glow: {
         intensity: {
-            border: '0.6',      // Border glow opacity (0-1)
-            shadow: '0.3',      // Shadow glow opacity (0-1)
-            highlight: '0.9'    // Highlight glow opacity (0-1)
+            border: '0.1',      // Border glow opacity (0-1)
+            shadow: '0.8',      // Shadow glow opacity (0-1)
+            highlight: '0.2'    // Highlight glow opacity (0-1)
         },
         colors: {
             primary: '#FF9A9E',
@@ -243,213 +243,220 @@ document.addEventListener('mouseup', async function (e) {
                 }
             `;
 
-            async function updateSummary(length, type) {
-                textContainer.innerHTML = '';
-                const spinner = createLoadingSpinner();
-                textContainer.appendChild(spinner);
-
-                try {
-                    const options = {
-                        sharedContext: 'Summarizing selected text',
-                        type: type,
-                        format: 'plain-text',
-                        length: length
-                    };
-
-                    const summarizer = await self.ai.summarizer.create(options);
-                    const summary = await summarizer.summarize(selectionText, {
-                        context: 'This is a user-selected text summary.'
-                    });
-
+                async function updateSummary(length, type) {
                     textContainer.innerHTML = '';
-                    
-                    // Clean up the summary text by removing asterisks and extra whitespace
-                    const cleanSummary = summary.replace(/\*/g, '').trim();
-                    
-                    const summaryContent = document.createElement('div');
-                    summaryContent.style.cssText = `
-                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-                        color: #2c3e50;
-                        line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
-                        font-size: ${BOX_CONFIG.fonts.paragraph.size};
-                        opacity: 0;
-                        transform: translateY(10px);
-                        transition: opacity 0.5s ease, transform 0.5s ease;
-                    `;
+                    const spinner = createLoadingSpinner();
+                    textContainer.appendChild(spinner);
 
-                    if (type === 'key-points') {
-                        // Split by periods and clean each point
-                        const points = cleanSummary.split('.')
-                            .filter(point => point.trim().length > 0)
-                            .map(point => point.trim());
+                    // Add glowing effect to the box
+                    const box = document.getElementById('selection-box');
+                    box.classList.add('loading-glow');
 
-                        summaryContent.innerHTML = points.map(point => 
-                            `<p style="
-                                margin: 8px 0;
-                                padding-left: 20px;
-                                position: relative;
-                                font-size: ${BOX_CONFIG.fonts.bulletPoints.size};
-                                line-height: ${BOX_CONFIG.fonts.bulletPoints.lineHeight};
-                                color: ${BOX_CONFIG.colors.text.generated.bullet};
+                    try {
+                        const options = {
+                            sharedContext: 'Summarizing selected text',
+                            type: type,
+                            format: 'plain-text',
+                            length: length
+                        };
+
+                        const summarizer = await self.ai.summarizer.create(options);
+                        const summary = await summarizer.summarize(selectionText, {
+                            context: 'This is a user-selected text summary.'
+                        });
+
+                        textContainer.innerHTML = '';
+                        
+                        // Clean up the summary text by removing asterisks and extra whitespace
+                        const cleanSummary = summary.replace(/\*/g, '').trim();
+                        
+                        const summaryContent = document.createElement('div');
+                        summaryContent.style.cssText = `
+                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+                            color: #2c3e50;
+                            line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
+                            font-size: ${BOX_CONFIG.fonts.paragraph.size};
+                            opacity: 0;
+                            transform: translateY(10px);
+                            transition: opacity 0.5s ease, transform 0.5s ease;
+                        `;
+
+                        if (type === 'key-points') {
+                            // Split by periods and clean each point
+                            const points = cleanSummary.split('.')
+                                .filter(point => point.trim().length > 0)
+                                .map(point => point.trim());
+
+                            summaryContent.innerHTML = points.map(point => 
+                                `<p style="
+                                    margin: 8px 0;
+                                    padding-left: 20px;
+                                    position: relative;
+                                    font-size: ${BOX_CONFIG.fonts.bulletPoints.size};
+                                    line-height: ${BOX_CONFIG.fonts.bulletPoints.lineHeight};
+                                    color: ${BOX_CONFIG.colors.text.generated.bullet};
+                                    opacity: 0;
+                                    transform: translateY(10px);
+                                    transition: opacity 0.3s ease, transform 0.3s ease;
+                                ">
+                                    <span style="
+                                        position: absolute;
+                                        left: 0;
+                                        content: '•';
+                                        color: ${BOX_CONFIG.colors.text.generated.highlight};
+                                    ">•</span>
+                                    ${point}
+                                </p>`
+                            ).join('');
+                        } else if (type === 'headline') {
+                            summaryContent.innerHTML = `
+                                <h3 style="
+                                    margin: 0 0 10px 0;
+                                    font-size: ${BOX_CONFIG.fonts.headline.size};
+                                    font-weight: ${BOX_CONFIG.fonts.headline.weight};
+                                    color: ${BOX_CONFIG.colors.text.generated.heading};
+                                    opacity: 0;
+                                    transform: translateY(10px);
+                                    transition: opacity 0.3s ease, transform 0.3s ease;
+                                ">${cleanSummary}</h3>`;
+                        } else {
+                            // For tl;dr and teaser
+                            const paragraphs = cleanSummary.split('\n')
+                                .filter(para => para.trim().length > 0)
+                                .map(para => para.trim());
+
+                            summaryContent.innerHTML = paragraphs.map(para =>
+                                `<p style="
+                                    margin: 0 0 12px 0;
+                                    text-align: justify;
+                                    font-size: ${BOX_CONFIG.fonts.paragraph.size};
+                                    line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
+                                    color: ${BOX_CONFIG.colors.text.generated.paragraph};
+                                    opacity: 0;
+                                    transform: translateY(10px);
+                                    transition: opacity 0.3s ease, transform 0.3s ease;
+                                ">${para}</p>`
+                            ).join('');
+                        }
+
+                        textContainer.appendChild(summaryContent);
+
+                        // Trigger the animation after a brief delay
+                        requestAnimationFrame(() => {
+                            summaryContent.style.opacity = '1';
+                            summaryContent.style.transform = 'translateY(0)';
+                            
+                            // Animate each paragraph/point with a stagger effect
+                            const elements = summaryContent.children;
+                            Array.from(elements).forEach((element, index) => {
+                                setTimeout(() => {
+                                    element.style.opacity = '1';
+                                    element.style.transform = 'translateY(0)';
+                                }, index * 100); // 100ms delay between each element
+                            });
+                        });
+
+                    } catch (error) {
+                        console.error('Error generating summary:', error);
+                        textContainer.innerHTML = `
+                            <div style="
+                                color: ${BOX_CONFIG.colors.text.generated.error};
+                                text-align: center;
+                                padding: 20px;
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
                                 opacity: 0;
                                 transform: translateY(10px);
                                 transition: opacity 0.3s ease, transform 0.3s ease;
                             ">
-                                <span style="
-                                    position: absolute;
-                                    left: 0;
-                                    content: '•';
-                                    color: ${BOX_CONFIG.colors.text.generated.highlight};
-                                ">•</span>
-                                ${point}
-                            </p>`
-                        ).join('');
-                    } else if (type === 'headline') {
-                        summaryContent.innerHTML = `
-                            <h3 style="
-                                margin: 0 0 10px 0;
-                                font-size: ${BOX_CONFIG.fonts.headline.size};
-                                font-weight: ${BOX_CONFIG.fonts.headline.weight};
-                                color: ${BOX_CONFIG.colors.text.generated.heading};
-                                opacity: 0;
-                                transform: translateY(10px);
-                                transition: opacity 0.3s ease, transform 0.3s ease;
-                            ">${cleanSummary}</h3>`;
-                    } else {
-                        // For tl;dr and teaser
-                        const paragraphs = cleanSummary.split('\n')
-                            .filter(para => para.trim().length > 0)
-                            .map(para => para.trim());
-
-                        summaryContent.innerHTML = paragraphs.map(para =>
-                            `<p style="
-                                margin: 0 0 12px 0;
-                                text-align: justify;
-                                font-size: ${BOX_CONFIG.fonts.paragraph.size};
-                                line-height: ${BOX_CONFIG.fonts.paragraph.lineHeight};
-                                color: ${BOX_CONFIG.colors.text.generated.paragraph};
-                                opacity: 0;
-                                transform: translateY(10px);
-                                transition: opacity 0.3s ease, transform 0.3s ease;
-                            ">${para}</p>`
-                        ).join('');
-                    }
-
-                    textContainer.appendChild(summaryContent);
-
-                    // Trigger the animation after a brief delay
-                    requestAnimationFrame(() => {
-                        summaryContent.style.opacity = '1';
-                        summaryContent.style.transform = 'translateY(0)';
+                                Failed to generate summary. Please try again.
+                            </div>`;
                         
-                        // Animate each paragraph/point with a stagger effect
-                        const elements = summaryContent.children;
-                        Array.from(elements).forEach((element, index) => {
-                            setTimeout(() => {
-                                element.style.opacity = '1';
-                                element.style.transform = 'translateY(0)';
-                            }, index * 100); // 100ms delay between each element
+                        // Animate error message
+                        requestAnimationFrame(() => {
+                            textContainer.children[0].style.opacity = '1';
+                            textContainer.children[0].style.transform = 'translateY(0)';
                         });
-                    });
-
-                } catch (error) {
-                    console.error('Error generating summary:', error);
-                    textContainer.innerHTML = `
-                        <div style="
-                            color: ${BOX_CONFIG.colors.text.generated.error};
-                            text-align: center;
-                            padding: 20px;
-                            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-                            opacity: 0;
-                            transform: translateY(10px);
-                            transition: opacity 0.3s ease, transform 0.3s ease;
-                        ">
-                            Failed to generate summary. Please try again.
-                        </div>`;
-                    
-                    // Animate error message
-                    requestAnimationFrame(() => {
-                        textContainer.children[0].style.opacity = '1';
-                        textContainer.children[0].style.transform = 'translateY(0)';
-                    });
+                    } finally {
+                        // Remove glowing effect when done
+                        box.classList.remove('loading-glow');
+                    }
                 }
-            }
 
-            // Create and add controls with fixed positioning
-            const controls = createControlsUI(summaryContainer, updateSummary);
-            controls.style.cssText += `
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                background: ${BOX_CONFIG.colors.background};
-                z-index: 1;
-                border-top-left-radius: 12px;
-                border-top-right-radius: 12px;
-            `;
+                // Create and add controls with fixed positioning
+                const controls = createControlsUI(summaryContainer, updateSummary);
+                controls.style.cssText += `
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    background: ${BOX_CONFIG.colors.background};
+                    z-index: 1;
+                    border-top-left-radius: 12px;
+                    border-top-right-radius: 12px;
+                `;
 
-            // Add components to container
-            summaryContainer.appendChild(controls);
-            summaryContainer.appendChild(textContainer);
-            box.appendChild(summaryContainer);
+                // Add components to container
+                summaryContainer.appendChild(controls);
+                summaryContainer.appendChild(textContainer);
+                box.appendChild(summaryContainer);
 
-            // Animate box expansion
-            const rect = range.getBoundingClientRect();
-            const horizontalCenter = rect.left + (rect.width / 2);
-            
-            box.style.width = `${BOX_CONFIG.expandedWidth}px`;
-            box.style.height = `${BOX_CONFIG.expandedHeight}px`;
-            box.style.left = `${horizontalCenter - (BOX_CONFIG.expandedWidth / 2)}px`;
-            
-            // Initial summary generation
-            setTimeout(() => {
-                summaryContainer.style.opacity = '1';
-                // Start with default options
-                updateSummary('short', 'key-points');
-            }, 300);
-
-            // Add close button
-            const closeButton = document.createElement('button');
-            closeButton.innerHTML = '×';
-            closeButton.style.cssText = `
-                position: absolute;
-                top: 8px;
-                right: 12px;
-                width: 20px;
-                height: 20px;
-                border: none;
-                background: transparent;
-                font-size: 18px;
-                line-height: 1;
-                cursor: pointer;
-                color: ${BOX_CONFIG.colors.text.primary};
-                z-index: 20;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.2s;
-                opacity: 0.6;
-                padding: 0;
-                &:hover {
-                    opacity: 1;
-                    transform: rotate(90deg);
-                }
-            `;
-            closeButton.onclick = () => {
+                // Animate box expansion
                 const rect = range.getBoundingClientRect();
                 const horizontalCenter = rect.left + (rect.width / 2);
-                const collapsedLeft = horizontalCenter - (BOX_CONFIG.width / 2);
-
-                box.style.width = `${BOX_CONFIG.width}px`;
-                box.style.height = `${BOX_CONFIG.height}px`;
-                box.style.left = `${collapsedLeft}px`;
                 
-                summaryContainer.remove();
-                closeButton.remove();
-                button1.style.display = 'flex';
-                button2.style.display = 'flex';
-            };
-            box.appendChild(closeButton);
+                box.style.width = `${BOX_CONFIG.expandedWidth}px`;
+                box.style.height = `${BOX_CONFIG.expandedHeight}px`;
+                box.style.left = `${horizontalCenter - (BOX_CONFIG.expandedWidth / 2)}px`;
+                
+                // Initial summary generation
+                setTimeout(() => {
+                    summaryContainer.style.opacity = '1';
+                    // Start with default options
+                    updateSummary('short', 'key-points');
+                }, 300);
+
+                // Add close button
+                const closeButton = document.createElement('button');
+                closeButton.innerHTML = '×';
+                closeButton.style.cssText = `
+                    position: absolute;
+                    top: 8px;
+                    right: 12px;
+                    width: 20px;
+                    height: 20px;
+                    border: none;
+                    background: transparent;
+                    font-size: 18px;
+                    line-height: 1;
+                    cursor: pointer;
+                    color: ${BOX_CONFIG.colors.text.primary};
+                    z-index: 20;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.2s;
+                    opacity: 0.6;
+                    padding: 0;
+                    &:hover {
+                        opacity: 1;
+                        transform: rotate(90deg);
+                    }
+                `;
+                closeButton.onclick = () => {
+                    const rect = range.getBoundingClientRect();
+                    const horizontalCenter = rect.left + (rect.width / 2);
+                    const collapsedLeft = horizontalCenter - (BOX_CONFIG.width / 2);
+
+                    box.style.width = `${BOX_CONFIG.width}px`;
+                    box.style.height = `${BOX_CONFIG.height}px`;
+                    box.style.left = `${collapsedLeft}px`;
+                    
+                    summaryContainer.remove();
+                    closeButton.remove();
+                    button1.style.display = 'flex';
+                    button2.style.display = 'flex';
+                };
+                box.appendChild(closeButton);
         };
 
         button2.onclick = async () => {
@@ -1369,4 +1376,42 @@ function createLoadingSpinner() {
     
     return spinnerContainer;
     
+}
+
+// Update the glowing animation styles
+if (!document.querySelector('#glowingBorderStyles')) {
+    const glowStyles = document.createElement('style');
+    glowStyles.id = 'glowingBorderStyles';
+    glowStyles.textContent = `
+        @keyframes borderGlow {
+            0% {
+                border-color: transparent;
+                box-shadow: 0 0 0 ${BOX_CONFIG.glow.colors.primary}00;
+            }
+            25% {
+                border-color: ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)};
+                box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
+            }
+            50% {
+                border-color: ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)};
+                box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.secondary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
+            }
+            75% {
+                border-color: ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.border * 255).toString(16)};
+                box-shadow: 0 0 15px ${BOX_CONFIG.glow.colors.primary}${Math.floor(BOX_CONFIG.glow.intensity.shadow * 255).toString(16)};
+            }
+            100% {
+                border-color: transparent;
+                box-shadow: 0 0 0 ${BOX_CONFIG.glow.colors.primary}00;
+            }
+        }
+
+        .loading-glow {
+            animation: borderGlow ${BOX_CONFIG.glow.animation.duration} ${BOX_CONFIG.glow.animation.timing} infinite !important;
+            border-width: 2px !important;
+            border-style: solid !important;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+    `;
+    document.head.appendChild(glowStyles);
 }
