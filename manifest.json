@@ -5,14 +5,11 @@
   "description": "Shows a button near selected text.",
   "permissions": ["activeTab", "scripting", "storage", "aiOriginTrial"],
   "host_permissions": ["<all_urls>"],
-  // "background": {
-  //   "service_worker": "background.js"
-  // },
+
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
-      "css": ["styles.css"]
+      "js": ["content.js"]
     }
   ],
   "origin_trial": {

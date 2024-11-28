@@ -903,45 +903,94 @@ document.addEventListener('mouseup', async function (e) {
                             : chunk;
                         
                         if (newChunk) {
-                            // Create a new element for the chunk
-                            const chunkElement = document.createElement('span');
-                            chunkElement.style.cssText = `
-                                opacity: 0;
-                                transform: translateY(5px);
-                                animation: fadeIn 0.3s ease forwards;
-                                display: inline;
-                            `;
+                            // Process all formatting first
+                            let formattedChunk = newChunk;
                             
-                            // Handle formatting for the new chunk
-                            let formattedChunk = newChunk
-                                // Handle bold text (**text**)
-                                .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight: 600;">$1</strong>')
-                                // Handle italic text (*text*)
-                                .replace(/\*(.*?)\*/g, '<em style="font-style: italic;">$1</em>')
-                                // Remove any remaining asterisks
+                            // Create a temporary div to process markdown-style formatting
+                            const tempDiv = document.createElement('div');
+                            tempDiv.textContent = formattedChunk;
+                            
+                            // Process in specific order to avoid conflicts
+                            formattedChunk = tempDiv.textContent
+                                // Process code blocks first (to avoid conflicts with other formatting)
+                                .replace(/`([^`]+)`/g, '<code class="ai-code">$1</code>')
+                                // Process bold before italic
+                                .replace(/\*\*([^*]+)\*\*/g, '<strong class="ai-bold">$1</strong>')
+                                // Process italic
+                                .replace(/\*([^*]+)\*/g, '<em class="ai-italic">$1</em>')
+                                // Process bullet points last
+                                .replace(/^- (.+)$/gm, '<div class="ai-bullet"><span class="ai-bullet-point">•</span><span class="ai-bullet-text">$1</span></div>')
+                                // Clean up any remaining special characters
                                 .replace(/\*/g, '');
 
-                            chunkElement.innerHTML = formattedChunk;
-                            responseContent.appendChild(chunkElement);
-                        }
-
-                        // Add keyframe animation for fadeIn if not already present
-                        if (!document.querySelector('#fadeInAnimation')) {
-                            const styleSheet = document.createElement('style');
-                            styleSheet.id = 'fadeInAnimation';
-                            styleSheet.textContent = `
-                                @keyframes fadeIn {
-                                    from {
+                            // Create the chunk element with pre-applied styles
+                            const chunkElement = document.createElement('span');
+                            chunkElement.className = 'ai-chunk';
+                            
+                            // Add the formatting styles if not already present
+                            if (!document.querySelector('#aiFormatStyles')) {
+                                const formatStyles = document.createElement('style');
+                                formatStyles.id = 'aiFormatStyles';
+                                formatStyles.textContent = `
+                                    .ai-chunk {
                                         opacity: 0;
                                         transform: translateY(5px);
+                                        animation: fadeIn 0.3s ease forwards;
+                                        display: inline;
+                                        line-height: 1.6;
+                                        color: ${BOX_CONFIG.colors.text.generated.response};
                                     }
-                                    to {
-                                        opacity: 1;
-                                        transform: translateY(0);
+                                    .ai-code {
+                                        background: rgba(255,255,255,0.1);
+                                        padding: 2px 4px;
+                                        border-radius: 3px;
+                                        font-family: monospace;
+                                        font-size: 0.9em;
                                     }
-                                }
-                            `;
-                            document.head.appendChild(styleSheet);
+                                    .ai-bold {
+                                        color: ${BOX_CONFIG.colors.text.generated.heading};
+                                        font-weight: 600;
+                                        font-size: 1.0em;
+                                    }
+                                    .ai-italic {
+                                        font-style: italic;
+                                    }
+                                    .ai-bullet {
+                                        display: flex;
+                                        align-items: baseline;
+                                        gap: 8px;
+                                        margin: 4px 0;
+                                    }
+                                    .ai-bullet-point {
+                                        color: ${BOX_CONFIG.colors.text.generated.highlight};
+                                    }
+                                    .ai-bullet-text {
+                                        flex: 1;
+                                    }
+                                    @keyframes fadeIn {
+                                        from {
+                                            opacity: 0;
+                                            transform: translateY(5px);
+                                        }
+                                        to {
+                                            opacity: 1;
+                                            transform: translateY(0);
+                                        }
+                                    }
+                                `;
+                                document.head.appendChild(formatStyles);
+                            }
+
+                            // Set the formatted content
+                            chunkElement.innerHTML = formattedChunk;
+                            
+                            // Ensure the response container has the necessary class
+                            if (!responseContent.classList.contains('ai-response')) {
+                                responseContent.classList.add('ai-response');
+                            }
+
+                            // Add the fully formatted chunk to the response
+                            responseContent.appendChild(chunkElement);
                         }
 
                         previousContent = chunk;
