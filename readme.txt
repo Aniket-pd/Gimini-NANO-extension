@@ -3,6 +3,35 @@
 ## Overview  
 **TextLens** is a powerful web tool designed to make text selection and analysis effortless directly within any webpage. With its advanced summarization and AI-powered chat features, it helps users quickly digest information and interact with content seamlessly, improving productivity and understanding.
 
+## Installation Guide
+
+### Developer Mode Installation (Load Unpacked)
+
+1. **Download and Extract**
+   - Download the extension files
+   - Extract/Unzip to a folder on your computer
+
+2. **Open Chrome Extensions Page**
+   - Open Google Chrome
+   - Type `chrome://extensions/` in the address bar
+   - Press Enter
+
+3. **Enable Developer Mode**
+   - Look for the "Developer mode" toggle in the top-right corner
+   - Switch it ON
+
+4. **Load the Extension**
+   - Click the "Load unpacked" button in the top-left
+   - Navigate to the folder containing the extension files
+   - Select the folder (make sure manifest.json is in the root of this folder)
+   - Click "Select Folder"
+
+5. **Verify Installation**
+   - The extension should appear in your extensions list
+   - Make sure it's enabled (toggle should be blue/on)
+   - You may need to restart Chrome for the extension to work properly
+
+
 ## Features  
 
 ### 🌟 Smart Text Summarization  
