@@ -1213,7 +1213,7 @@ document.addEventListener('mouseup', async function (e) {
         };
 
         // Modify the global mousedown handler
-        document.removeEventListener('mousedown', handleMouseDown); // Remove old handler if exists
+        //document.removeEventListener('mousedown', handleMouseDown); // Remove old handler if exists
         document.addEventListener('mousedown', (e) => {
             const box = document.getElementById('selection-box');
             if (box && !box.contains(e.target) && !e.target.closest('#selection-box')) {

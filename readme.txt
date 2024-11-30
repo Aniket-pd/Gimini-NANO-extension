@@ -17,6 +17,8 @@
 - Ask questions about selected text and get **real-time, context-aware responses**.  
 - Perfect for clarifying complex topics, fact-checking, or diving deeper into content.  
 
+
+
 ### 🚀 Responsive and Intuitive UI  
 - **Floating Interface**: Pops up exactly when needed, positioned intelligently to avoid overlaps.  
 - **Sleek Design**: Modern glass-morphism style with smooth animations.  
